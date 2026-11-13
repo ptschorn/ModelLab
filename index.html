@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.3.21 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.3.26 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -586,7 +586,7 @@ html.present .taskbtn{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.3.21';
+const APP_NAME='ModelLab',APP_VER='1.3.26';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -631,7 +631,7 @@ const snap=v=>SET.snap?Math.round(v/SET.snap)*SET.snap:Math.round(v);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const DCSS=`.d-shape{fill:var(--nodefill);stroke:var(--ink);stroke-width:1.3}
+const DCSS=`.d-num{fill:var(--nodefill);font-weight:700;font-size:12.5px;font-family:'IBM Plex Sans',system-ui,sans-serif}.d-parr{stroke-width:1.5}.d-ink.d-parr{stroke-width:1;stroke-linejoin:round}.d-shape{fill:var(--nodefill);stroke:var(--ink);stroke-width:1.3}
 .d-line{fill:none;stroke:var(--ink);stroke-width:1.3}
 .d-ink{fill:var(--ink);stroke:var(--ink);stroke-width:1}
 .d-dash{stroke-dasharray:6 4}
@@ -713,6 +713,9 @@ const ST0BASE=st0.textContent;st0.textContent+=fontCSS()+styleCSS();document.hea
 
 /* ---------- Icons ---------- */
 const IC={
+iball:'<path d="M2.5 12h11"/><circle cx="17" cy="12" r="3.8"/>',
+isock:'<path d="M2.5 12h10"/><path d="M18.5 6.5a5.5 5.5 0 0 0 0 11"/>',
+ballsock:'<path d="M2 12h6.5M17.5 12H22"/><path d="M13 6.5a5.5 5.5 0 0 0 0 11"/><circle cx="13.5" cy="12" r="3.2"/>',
 tw_pop:'<rect x="3.5" y="6.5" width="13" height="13" rx="2"/><path d="M13 3.5h7.5V11M20.5 3.5l-9 9"/>',
 tw_dock:'<rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><rect x="6.5" y="12" width="6.5" height="5.5" rx="1" fill="currentColor" stroke="none"/><path d="M18 6l-5.5 5.5M12.5 7v4.5H17"/>',
 tw_fs:'<path d="M3 19l5-13 5 13M4.8 14.5h6.4"/><path d="M14 19l3.5-9 3.5 9M15.2 16h4.6"/>',
@@ -726,7 +729,7 @@ tw_clear:'<path d="M6 5h12M12 5l-3 14"/><path d="M15 14l5 5M20 14l-5 5"/>',
 reset:'<path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4"/><path d="M4.5 4.5v4h4"/>',
 select:'<path d="M6 3l12 9-5.5 1 3 6-2.4 1.1-3-6L6 18z" fill="currentColor" stroke="none"/>',
 class:'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M3.5 9h17M3.5 14.5h17"/>',
-iface:'<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21"/>',
+iface:'<rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 10.5h17"/><path d="M7 14.5h6" stroke-width="1.4"/>',
 enum:'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M3.5 9h17M7 12.5h10M7 16h7"/>',
 note:'<path d="M4 3.5h11l5 5v12H4z"/><path d="M15 3.5v5h5"/>',
 assoc:'<path d="M3 12h18"/>',
@@ -777,7 +780,8 @@ sh_rect:'<rect x="3.5" y="6" width="17" height="12" rx="1"/>',
 sh_round:'<rect x="3.5" y="6" width="17" height="12" rx="4"/>',
 sh_ellipse:'<ellipse cx="12" cy="12" rx="8.5" ry="6"/>',
 sh_diamond:'<path d="M12 4 L20 12 L12 20 L4 12 Z"/>',
-sh_triangle:'<path d="M12 5 L20 19 L4 19 Z"/>',edit:'<path d="M14.5 5.5l4 4L9 19H5v-4z"/><path d="M12.5 7.5l4 4"/>',sh_arrow:'<path d="M3 9.5h10V6l8 6-8 6v-3.5H3z"/>',
+sh_triangle:'<path d="M12 5 L20 19 L4 19 Z"/>',edit:'<path d="M14.5 5.5l4 4L9 19H5v-4z"/><path d="M12.5 7.5l4 4"/>',sh_arrow:'<path d="M4 20L15.5 8.5"/><path d="M20 4l-2.2 7.6-5.4-5.4z" fill="currentColor"/>',
+sh_num:'<circle cx="12" cy="12" r="8.5" fill="currentColor" stroke="none"/><path d="M10.6 9.2l2-1.4v8.4" stroke="#fff" stroke-width="1.6"/>',
 rev:'<path d="M5 9h12M14 6l3 3-3 3"/><path d="M19 15H7M10 18l-3-3 3-3"/>',
 sh_text:'<path d="M6 6h12M12 6v12M9.5 18h5"/>',
 callact:'<rect x="3.5" y="6.5" width="17" height="11" rx="4"/><path d="M13 13h4M13 13v3.5M15 13v3.5M17 13v3.5"/>',
@@ -856,7 +860,7 @@ function classBox(g,n,kind){
   const W=Math.max(w,+n.uw||0),H=Math.max(h,+n.uh||0);w=W;h=H;
   S('rect',{x:0,y:0,width:w,height:h,class:'d-shape'},g);if(comps.length)S('path',{d:`M0.65,${headH} V6 Q0.65,0.65 6,0.65 H${w-6} Q${w-0.65},0.65 ${w-0.65},6 V${headH} Z`,class:'d-head'},g);else S('rect',{x:0.65,y:0.65,width:w-1.3,height:h-1.3,rx:5.4,class:'d-head'},g);
   if(st)T(g,w/2,V(17),'«'+st+'»','d-txt d-s','middle');
-  T(g,w/2,st?V(35):V(20),n.name||'Klasse','d-txt d-b'+(ital?' d-i':''),'middle');
+  T(g,w/2,st?V(35):V(20),(n.name==null?'Klasse':n.name),'d-txt d-b'+(ital?' d-i':''),'middle');
   let y=headH;
   comps.forEach(c=>{S('line',{x1:0,y1:y,x2:w,y2:y,class:'d-line'},g);c.forEach((m,i)=>T(g,P,y+V(18)+LH*i,m.s,'d-txt d-m'+(m.i?' d-i':'')+(m.u?' d-u':'')));y+=c.length?c.length*LH+10:12;});
   return{w,h};
@@ -936,14 +940,26 @@ function freeShape(g,n,kind){const w=n.w,h=n.h;
   const L=linesP(n.name);const cy=kind==='triangle'?h*0.66:h/2;const y0=cy-(L.length-1)*V(8.5)+V(4.5);L.forEach((l,i)=>T(g,w/2,y0+i*V(17),l,'d-txt','middle'));
   return{w,h,shape:kind==='ellipse'?'ellipse':kind==='diamond'?'diamond':'rect'};}
 
-function freeArrow(g,n){const w=n.w,h=n.h,dir=n.dir||'r';let L,B,ang;
-  if(dir==='r'||dir==='l'){L=w;B=h;ang=dir==='r'?0:180;}else if(dir==='u'||dir==='d'){L=h;B=w;ang=dir==='d'?90:270;}
-  else{const sx=dir.includes('r')?1:-1,sy=dir.includes('d')?1:-1;ang=Math.atan2(sy*h,sx*w)*180/Math.PI;L=Math.hypot(w,h)*0.92;B=Math.min(w,h)*0.8;}
-  const hw=Math.max(6,B*0.48),s=Math.max(3,B*0.2),hl=Math.min(L*0.5,hw*1.5),x0=-L/2+1,x1=L/2-1;
-  const C=(HLC.find(x=>x[0]===n.hl&&x[0])||[0,0,'#E8590C'])[2];const dk=c=>'#'+[1,3,5].map(i=>Math.round(parseInt(c.slice(i,i+2),16)*0.72).toString(16).padStart(2,'0')).join('');
-  S('rect',{x:0,y:0,width:w,height:h,fill:'transparent',stroke:'none'},g);
-  S('path',{d:`M${x0},${-s} L${x1-hl},${-s} L${x1-hl},${-hw} L${x1},0 L${x1-hl},${hw} L${x1-hl},${s} L${x0},${s} Z`,transform:`translate(${w/2},${h/2}) rotate(${ang.toFixed(2)})`,class:'d-parrow',fill:C,stroke:dk(C),'stroke-width':1.5,'stroke-linejoin':'round'},g);
-  return{w,h,shape:'rect'};}
+function parrNorm(n){
+  if(n.ax==null||n.bx==null){const w=+n.w||120,h=+n.h||56,d=n.dir||'r',m={r:[0,h/2,w,h/2],l:[w,h/2,0,h/2],u:[w/2,h,w/2,0],d:[w/2,0,w/2,h],ur:[0,h,w,0],dr:[0,0,w,h],dl:[w,0,0,h],ul:[w,h,0,0]}[d]||[0,h/2,w,h/2];
+    n.ax=m[0];n.ay=m[1];n.bx=m[2];n.by=m[3];delete n.w;delete n.h;delete n.dir;}
+  ['ax','ay','bx','by'].forEach(k=>{n[k]=+n[k]||0;});const mx=Math.min(n.ax,n.bx),my=Math.min(n.ay,n.by);
+  if(mx||my){n.x=+n.x+mx;n.y=+n.y+my;n.ax-=mx;n.bx-=mx;n.ay-=my;n.by-=my;}}
+function freeArrow(g,n){parrNorm(n);const a={x:n.ax,y:n.ay},b={x:n.bx,y:n.by},L=Math.hypot(b.x-a.x,b.y-a.y)||1,ux=(b.x-a.x)/L,uy=(b.y-a.y)/L;
+  const hl=Math.min(14,L*0.6),hw=5.2,f=v=>v.toFixed(1),nx=-uy,ny=ux,P=k=>({x:b.x-ux*hl*k,y:b.y-uy*hl*k});
+  const B=P(1),Lp={x:B.x+nx*hw,y:B.y+ny*hw},Rp={x:B.x-nx*hw,y:B.y-ny*hw},Cq=P(0.42),E=P(0.66);
+  const d=`M${f(a.x)},${f(a.y)} L${f(b.x)},${f(b.y)}`;S('path',{d,class:'hit'},g);
+  S('path',{d:`M${f(a.x)},${f(a.y)} L${f(E.x)},${f(E.y)}`,class:'d-line d-parr'},g);
+  S('path',{d:`M${f(b.x)},${f(b.y)} L${f(Lp.x)},${f(Lp.y)} Q${f(Cq.x)},${f(Cq.y)} ${f(Rp.x)},${f(Rp.y)} Z`,class:'d-ink d-parr'},g);
+  return{w:Math.max(1,Math.abs(b.x-a.x)),h:Math.max(1,Math.abs(b.y-a.y)),nohit:true};}
+const numR=n=>{const t=String(n.name==null?'':n.name).trim()||'?';return Math.max(12,tw(t,12.5)/2+6);};
+const PARR_GAP=4;
+/* Zeigepfeil an Nummer arretieren: Anfang sitzt mit kleiner Lücke am Kreis */
+function parrPin(s){const N=s.data.nodes;N.forEach(n=>{if(n.type!=='fr_arrow'||!n.pin)return;const k=N.find(x=>x.id===n.pin&&x.type==='fr_num');if(!k){delete n.pin;return;}parrNorm(n);
+  const r=numR(k),cx=k.x+r,cy=k.y+r,tx=n.x+n.bx,ty=n.y+n.by,L=Math.hypot(tx-cx,ty-cy)||1,sx=cx+(tx-cx)/L*(r+PARR_GAP),sy=cy+(ty-cy)/L*(r+PARR_GAP);
+  n.ax=sx-n.x;n.ay=sy-n.y;parrNorm(n);});}
+function freeNum(g,n){const t=String(n.name==null?'':n.name).trim()||'?',r=numR(n),w=r*2;
+  S('circle',{cx:r,cy:r,r,class:'d-ink'},g);T(g,r,r+4.5,t,'d-num','middle');return{w,h:w,shape:'circle'};}
 function freeText(g,n){const L=linesP(n.name);if(!L.length)L.push('Text');const fs=Math.max(8,Math.min(72,+n.fs||14));const px=fs*FZ(),lh=Math.round(px*1.3);
   let w=20;L.forEach(l=>w=Math.max(w,tw(l,fs)));w=Math.ceil(w)+6;const h=L.length*lh+Math.round(px*0.5);
   L.forEach((l,i)=>{const t=T(g,3,Math.round(px)+i*lh,l,'d-txt d-ftxt');t.setAttribute('style','font-size:'+px.toFixed(1)+'px');});return{w,h};}
@@ -1244,7 +1260,7 @@ const FN={k:'name',l:'Name',t:'text'};
 const NOTE={label:'Notiz',icon:'note',def:{text:'Kommentar'},size:[140,40],grow:true,minW:60,minH:30,fields:[{k:'text',l:'Text',t:'area'}],render:noteBox,hint:'Mit dem Werkzeug „Anker“ oder dem Pfeil-Knopf in der Mini-Leiste verbindest du eine Notiz mit einem Element. Die Größe lässt sich am Anfasser unten rechts ändern; Absätze mit Enter.'};
 const ANCHOR={label:'Anker (Notiz)',icon:'anchor',dash:true,fields:[],hint:'Gestrichelte Linie ohne Pfeil: verbindet eine Notiz mit einem Element oder – Notiz und dann einen Pfeil anklicken – mit einer Beziehung, z. B. einem «extend».'};
 const ANCHOR_A={label:'Anker (Notiz)',icon:'anchor',dash:true,fields:[],hint:'Gestrichelte Linie ohne Pfeil: verbindet eine Notiz oder Bemerkung mit einem Element.'};
-const ASSOC_F=[{k:'name',l:'Bezeichnung',t:'text',ph:'z. B. transportiert'},{k:'readDir',l:'Leserichtung der Bezeichnung',t:'select',opts:[['','keine'],['fwd','▶ vom Start zum Ziel'],['back','◀ vom Ziel zum Start']],help:'Kleines Dreieck neben der Bezeichnung, z. B. „Kunde besitzt ▶ Konto“.'},{k:'m1',l:'Multiplizität am Start',t:'text',ph:'z. B. 1'},{k:'r1',l:'Rolle am Start',t:'text'},{k:'m2',l:'Multiplizität am Ziel',t:'text',ph:'z. B. 0..*'},{k:'r2',l:'Rolle am Ziel',t:'text'},{k:'qual1',l:'Qualifizierer am Start',t:'text',ph:'z. B. persAusweisNr'},{k:'qual2',l:'Qualifizierer am Ziel',t:'text'}];
+const ASSOC_F=[{k:'name',l:'Bezeichnung',t:'text',ph:'z. B. transportiert'},{k:'readDir',l:'Leserichtung der Bezeichnung',t:'select',opts:[['','keine'],['fwd','▶ vom Start zum Ziel'],['back','◀ vom Ziel zum Start']],help:'Kleines Dreieck neben der Bezeichnung, z. B. „Kunde besitzt ▶ Konto“.'},{k:'m1',l:'Multiplizität am Start',t:'text',ph:'z. B. 1'},{k:'r1',l:'Rolle am Start',t:'text'},{k:'m2',l:'Multiplizität am Ziel',t:'text',ph:'z. B. 0..*'},{k:'r2',l:'Rolle am Ziel',t:'text'},{k:'qual1',l:'Qualifizierer am Start',t:'text',ph:'z. B. persAusweisNr',help:'Ein einzelnes _ zeichnet einen leeren Kasten.'},{k:'qual2',l:'Qualifizierer am Ziel',t:'text',help:'Ein einzelnes _ zeichnet einen leeren Kasten.'}];
 const NAV_O=[['','Standard der Beziehungsart'],['none','keine Angabe'],['arrow','navigierbar (Pfeil)'],['x','nicht navigierbar (X)']];
 const NAV_F=[{k:'nav1',l:'Navigierbarkeit am Start',t:'select',opts:NAV_O},{k:'nav2',l:'Navigierbarkeit am Ziel',t:'select',opts:NAV_O}];
 const assocLbl=e=>({mid:e.name,s:[e.m1,e.r1],t:[e.m2,e.r2]});
@@ -1259,6 +1275,8 @@ const CLASS={key:'class',hash:'klassen',name:'Klassendiagramm',short:'Klassen',t
   interface:{label:'Interface',icon:'iface',autoName:'Interface',size:[180,70],grow:true,minW:90,minH:40,def:{name:'INeu',attrs:'',ops:'+ operation() : void'},
     fields:[FN,{k:'attrs',l:'Konstanten',t:'area'},{k:'ops',l:'Operationen – eine pro Zeile',t:'area'}],render:(g,n)=>classBox(g,n,'interface'),hint:'Eine Klasse realisiert ein Interface: gestrichelte Linie mit leerem Dreieck.'},
   enum:{label:'Enumeration',icon:'enum',autoName:'Enum',size:[140,110],grow:true,minW:90,minH:40,def:{name:'Status',values:'AKTIV\nINAKTIV'},fields:[FN,{k:'values',l:'Werte – einer pro Zeile',t:'area'}],render:(g,n)=>classBox(g,n,'enum'),hint:'Aufzählungstyp mit festen Werten.'},
+  iball:{label:'Angebotene Schnittstelle',icon:'iball',autoName:'Schnittstelle',size:[18,18],def:{name:'Schnittstelle'},fields:[FN],render:(g,n)=>ifaceSym(g,n,'ball'),hint:'Lollipop: Die Klasse bietet diese Schnittstelle an. Mit einer Assoziation (einfache Linie) an die Klasse hängen.'},
+  isock:{label:'Benötigte Schnittstelle',icon:'isock',autoName:'Schnittstelle',size:[26,26],def:{name:'Schnittstelle'},fields:[FN],render:(g,n)=>ifaceSym(g,n,'sock'),hint:'Socket: Die Klasse benötigt diese Schnittstelle. Mit einer Assoziation (einfache Linie) an die Klasse hängen – der Halbkreis öffnet sich von der Klasse weg.'},
   note:NOTE},
  edges:{
   assoc:{label:'Assoziation',icon:'assoc',fields:[...ASSOC_F,...NAV_F],labels:assocLbl,hint:'Allgemeine Beziehung zwischen zwei Klassen, Navigierbarkeit nicht festgelegt.'},
@@ -1270,10 +1288,9 @@ const CLASS={key:'class',hash:'klassen',name:'Klassendiagramm',short:'Klassen',t
   inheritance:{label:'Vererbung',icon:'inh',end:'m-tri',fields:[],hint:'Von der Unterklasse zur Oberklasse ziehen.'},
   realization:{label:'Realisierung',icon:'real',end:'m-tri',dash:true,fields:[],hint:'Von der Klasse zum Interface ziehen.'},
   dependency:{label:'Abhängigkeit',icon:'dep',end:'m-open',dash:true,fields:[{k:'name',l:'Bezeichnung',t:'text',ph:'«use»'}],labels:e=>({mid:e.name}),hint:'Eine Klasse benutzt eine andere, z. B. als Parameter.'},
+  ballsock:{label:'Ball-and-Socket',icon:'ballsock',ballsock:true,fields:[{k:'name',l:'Schnittstelle (Name)',t:'text',ph:'z. B. Nahrung'}],hint:'Von der Klasse, die die Schnittstelle benötigt (Socket, Halbkreis), zur Klasse ziehen, die sie anbietet (Ball). Den Namen kann man mitsamt Symbol entlang der Linie ziehen.'},
   anchor:ANCHOR},
  puml:pumlClass};
-
-/* ---------- 2 Zustandsdiagramm ---------- */
 const STATE={key:'state',hash:'zustand',name:'Zustandsdiagramm',short:'Zustand',tabIcon:'state',
  intro:['Mit einem Startzustand beginnen, am Ende einen oder mehrere Endzustände setzen.','Zustände platzieren und benennen. Rechts lassen sich entry-, do- und exit-Aktivitäten sowie eigene innere Aktionen eintragen.','Transition wählen, Start- und Zielzustand anklicken. Beschriftung: Event [Guard] / Effekt, z. B. „bezahlen [Betrag > 0] / quittieren()“.','Start und Ziel gleich ergibt eine Selbsttransition – die Schleife am Eck-Quadrat größer ziehen.','Verzweigungen nach Bedingungen mit dem Entscheidungs-Knoten (Raute), jeder Ausgang mit [Guard].','Zusammengesetzte Zustände als Rahmen aufziehen und Unterzustände hineinsetzen – beim Verschieben wandert der Inhalt mit.'],
  nodes:{
@@ -1510,14 +1527,15 @@ const CFG={};Object.keys(CFG_ALL).forEach(k=>{if(CAT_ON.includes(CFG_ALL[k].cat)
 const ORDER=Object.keys(CFG);
 const CAT_OF=k=>(CFG_ALL[k]||{}).cat;
 const SHF=[{k:'name',l:'Beschriftung',t:'area',rows:2}];
-const PARROW_DIRS=[['r','→ nach rechts'],['l','← nach links'],['u','↑ nach oben'],['d','↓ nach unten'],['ur','↗ nach rechts oben'],['dr','↘ nach rechts unten'],['dl','↙ nach links unten'],['ul','↖ nach links oben']];
+const PARROW_DIRS_OLD=[['r','→ nach rechts'],['l','← nach links'],['u','↑ nach oben'],['d','↓ nach unten'],['ur','↗ nach rechts oben'],['dr','↘ nach rechts unten'],['dl','↙ nach links unten'],['ul','↖ nach links oben']];
 const FREE={
   fr_rect:{label:'Rechteck',icon:'sh_rect',resizable:true,minW:16,minH:16,def:{w:140,h:80,name:''},fields:SHF,render:(g,n)=>freeShape(g,n,'rect'),hint:'Freies Rechteck ohne Bedeutung im Modell – zum Gruppieren oder Hervorheben.'},
   fr_round:{label:'Abgerundetes Rechteck',icon:'sh_round',resizable:true,minW:16,minH:16,def:{w:140,h:80,name:''},fields:SHF,render:(g,n)=>freeShape(g,n,'round'),hint:'Freies abgerundetes Rechteck.'},
   fr_ellipse:{label:'Ellipse',icon:'sh_ellipse',resizable:true,minW:16,minH:16,def:{w:150,h:90,name:''},fields:SHF,render:(g,n)=>freeShape(g,n,'ellipse'),hint:'Freie Ellipse.'},
   fr_diamond:{label:'Raute',icon:'sh_diamond',resizable:true,minW:16,minH:16,def:{w:130,h:90,name:''},fields:SHF,render:(g,n)=>freeShape(g,n,'diamond'),hint:'Freie Raute.'},
   fr_triangle:{label:'Dreieck',icon:'sh_triangle',resizable:true,minW:16,minH:16,def:{w:120,h:100,name:''},fields:SHF,render:(g,n)=>freeShape(g,n,'triangle'),hint:'Freies Dreieck mit Spitze nach oben.'},
-  fr_arrow:{label:'Zeigepfeil',icon:'sh_arrow',resizable:true,minW:24,minH:16,def:{w:120,h:56,dir:'r'},fields:[{k:'dir',l:'Richtung',t:'select',opts:PARROW_DIRS}],render:(g,n)=>freeArrow(g,n),hint:'Kräftiger Pfeil, um in Präsentationen oder Aufgaben auf ein Element zu zeigen. Richtung hier einstellen, Größe am Anfasser ziehen, Farbe über „Hervorheben“ in der kleinen Leiste.'},
+  fr_arrow:{label:'Zeigepfeil',icon:'sh_arrow',size:[70,44],def:{ax:0,ay:0,bx:70,by:44},fields:[],render:(g,n)=>freeArrow(g,n),hint:'Dünner Pfeil mit Spitze, um auf ein Element zu zeigen. Anfang und Spitze an den runden Anfassern frei ziehen, den ganzen Pfeil an der Linie verschieben. Farbe über „Hervorheben“ in der kleinen Leiste.'},
+  fr_num:{label:'Nummer',icon:'sh_num',size:[24,24],def:{name:'1'},fields:[{k:'name',l:'Nummer',t:'text',ph:'z. B. 1'}],render:(g,n)=>freeNum(g,n),hint:'Gefüllter Kreis mit Nummer – zusammen mit dem Zeigepfeil für Markierungen. Neue Nummern zählen automatisch weiter.'},
   fr_text:{label:'Textfeld',icon:'sh_text',size:[80,24],def:{name:'Text',fs:'14'},fields:[{k:'name',l:'Text',t:'area',rows:3}],render:freeText,hint:'Freier Text ohne Rahmen. Farbe und Schriftgröße stellst du in der kleinen Leiste über dem ausgewählten Text ein.'}};
 const ndef=(c,type)=>c.nodes[type]||FREE[type];
 
@@ -1530,16 +1548,17 @@ function parents(nodes,isCont){const par={};nodes.forEach(n=>{const a=G[n.id];pa
   nodes.forEach(c=>{if(c===n||!isCont(c))return;const b=G[c.id];if(!b)return;if(isCont(n)&&a.w*a.h>=b.w*b.h)return;
    if(cx>b.x&&cx<b.x+b.w&&cy>b.y&&cy<b.y+b.h&&b.w*b.h<ba){par[n.id]=c.id;ba=b.w*b.h;}});});return par;}
 function pumlClass(d){const o=['@startuml','skinparam classAttributeIconSize 0'];if(d.title)o.push('title '+d.title);
-  const dn0=d.nodes.filter(n=>!FREE[n.type]);const al=aliasMap(dn0,n=>({class:'C',interface:'I',enum:'E',note:'N'}[n.type]||'X'));
+  const dn0=d.nodes.filter(n=>!FREE[n.type]);const al=aliasMap(dn0,n=>({class:'C',interface:'I',enum:'E',note:'N',iball:'S',isock:'S'}[n.type]||'X'));
   const mem=s=>lines(s).map(l=>'  '+l.trim());
   dn0.forEach(n=>{const a=al[n.id];
     if(n.type==='note'){o.push(`note ${q(n.text)} as ${a.a}`);return;}
+    if(n.type==='iball'||n.type==='isock'){o.push(`circle ${q(n.name||'Schnittstelle')} as ${a.a}`+(n.type==='isock'?' <<benötigt>>':''));return;}
     const kw=n.type==='interface'?'interface':n.type==='enum'?'enum':(n.abstract?'abstract class':'class');
     let head=a.plain?`${kw} ${a.a}`:`${kw} ${q(n.name)} as ${a.a}`;if(n.type==='class'&&n.stereo)head+=` <<${n.stereo}>>`;
     const body=n.type==='enum'?mem(n.values):[...mem(n.attrs),...mem(n.ops)];o.push(head+' {',...body,'}');});
   const HL={'m-open':'<','m-x':'x','m-dia':'o','m-diaf':'*','m-tri':'<|'},HR={'m-open':'>','m-x':'x','m-dia':'o','m-diaf':'*','m-tri':'|>'};
   const ar=e=>{const et=CLASS.edges[e.type]||{};const[a,b]=effMarks(e,et);return(HL[a]||'')+(et.dash?'..':'--')+(HR[b]||'');};
-  d.edges.forEach(e=>{const a=al[e.from],b=al[e.to];if(!a||!b)return;const s1=[e.r1,e.m1].filter(Boolean).join(' '),s2=[e.r2,e.m2].filter(Boolean).join(' ');
+  d.edges.forEach(e=>{const a=al[e.from],b=al[e.to];if(!a||!b)return;if(e.type==='ballsock'){o.push(`' Ball-and-Socket: ${a.a} benötigt, ${b.a} bietet an`,`${a.a} ..> ${b.a}`+(e.name?' : '+e.name:''));return;}const s1=[e.r1,e.m1].filter(Boolean).join(' '),s2=[e.r2,e.m2].filter(Boolean).join(' ');
     let l=a.a;if(s1)l+=' '+q(s1);l+=' '+ar(e);if(s2)l+=' '+q(s2);l+=' '+b.a;if(e.name)l+=' : '+(e.readDir==='back'?'< ':'')+e.name+(e.readDir==='fwd'?' >':'');o.push(l);});
   o.push('@enduml');return o.join('\n');}
 function pumlState(d){const o=['@startuml','hide empty description'];if(d.title)o.push('title '+d.title);
@@ -1695,17 +1714,54 @@ function polyProj(P,p){let tot=0,best=1e18,bf=0.5;const L=[];for(let i=0;i<P.len
   return Math.max(0.08,Math.min(0.92,bf));}
 function polyMidSeg(P){let tot=0;for(let i=0;i<P.length-1;i++)tot+=Math.hypot(P[i+1].x-P[i].x,P[i+1].y-P[i].y);let h=tot/2;
   for(let i=0;i<P.length-1;i++){const l=Math.hypot(P[i+1].x-P[i].x,P[i+1].y-P[i].y);if(h<=l||i===P.length-2){const t=l?Math.min(1,h/l):0;return{pt:{x:P[i].x+(P[i+1].x-P[i].x)*t,y:P[i].y+(P[i+1].y-P[i].y)*t},a:P[i],b:P[i+1]};}h-=l;}}
-function endLabels(g,p,ux,uy,arr){if(!arr)return;const[mult,role]=arr;const bx=p.x+ux*22,by=p.y+uy*22;const nx=-uy,ny=ux;
+function endLabels(g,p,ux,uy,arr){if(!arr)return;const[mult,role]=arr;
+  if(Math.abs(ux)>=Math.abs(uy)*1.2){const sg=ux>0?1:-1,x=p.x+ux*10,y=p.y+uy*10,a=sg>0?'start':'end';
+    if(mult)T(g,x,y+sg*10+4,mult,'d-txt d-n d-halo',a);if(role)T(g,x,y-sg*10+4,role,'d-txt d-n d-halo',a);return;}
+  const bx=p.x+ux*22,by=p.y+uy*22;const nx=-uy,ny=ux;
   const anc=v=>v>0.5?'start':v<-0.5?'end':'middle';
   if(mult)T(g,bx+nx*10,by+ny*10+4,mult,'d-txt d-n d-halo',anc(nx));
   if(role)T(g,bx-nx*10,by-ny*10+4,role,'d-txt d-n d-halo',anc(-nx));}
-function qualBox(A,p,label){const t=(label||'').trim();if(!t)return p;const wq=Math.ceil(tw(t,12.5)+16),hq=Math.max(20,V(20));
+function qualBox(A,p,label){const t0=(label||'').trim();if(!t0)return p;const t=t0==='_'?'':t0,wq=t0==='_'?56:Math.ceil(tw(t,12.5)+16),hq=Math.max(20,V(20));
   const cx=A.x+A.w/2,cy=A.y+A.h/2,dx=p.x-cx,dy=p.y-cy;let bx,by,ox,oy;
   if(Math.abs(dx)>=Math.abs(dy)){const s=dx>=0?1:-1;by=p.y-hq/2;bx=s>0?p.x:p.x-wq;ox=s>0?bx+wq:bx;oy=p.y;}
   else{const s=dy>=0?1:-1;bx=p.x-wq/2;by=s>0?p.y:p.y-hq;ox=p.x;oy=s>0?by+hq:by;}
-  S('rect',{x:bx,y:by,width:wq,height:hq,class:'d-shape'},QLAY);T(QLAY,bx+wq/2,by+hq/2+V(4.5),t,'d-txt','middle');return{x:ox,y:oy};}
+  S('rect',{x:bx,y:by,width:wq,height:hq,class:'d-shape'},QLAY);if(t)T(QLAY,bx+wq/2,by+hq/2+V(4.5),t,'d-txt','middle');return{x:ox,y:oy};}
 const NAVM={none:null,arrow:'m-open',x:'m-x'};
 const effMarks=(e,et)=>[e.nav1&&!et.fixedStart?NAVM[e.nav1]:et.start,e.nav2?NAVM[e.nav2]:et.end];
+/* Versetzte Parallel-Linien enden genau am Kastenrand (ab 1.3.26) */
+function rayRect(R,px,py,ux,uy){if(!R||R.shape==='circle'||R.shape==='ellipse'||R.shape==='diamond')return null;if(px<R.x||px>R.x+R.w||py<R.y||py>R.y+R.h)return null;
+  const tx=ux>1e-9?(R.x+R.w-px)/ux:ux<-1e-9?(R.x-px)/ux:Infinity,ty=uy>1e-9?(R.y+R.h-py)/uy:uy<-1e-9?(R.y-py)/uy:Infinity,t=Math.min(tx,ty);return isFinite(t)?{x:px+ux*t,y:py+uy*t}:null;}
+/* Schnittstellen-Symbole (Klassendiagramm, ab 1.3.22) */
+const BS_RS=13,BS_RB=8.5;
+function polySplit(P,f){let tot=0;const L=[];for(let i=0;i<P.length-1;i++){const l=Math.hypot(P[i+1].x-P[i].x,P[i+1].y-P[i].y);L.push(l);tot+=l;}
+  let h=tot*Math.min(1,Math.max(0,f));for(let i=0;i<L.length;i++){if(h<=L[i]||i===L.length-1){const k=L[i]?Math.min(1,h/L[i]):0,a=P[i],b=P[i+1],pt={x:a.x+(b.x-a.x)*k,y:a.y+(b.y-a.y)*k},l=L[i]||1;
+    return{pt,a,b,u:{x:(b.x-a.x)/l,y:(b.y-a.y)/l},before:P.slice(0,i+1),after:P.slice(i+1),pos:h,tot,seg:L[i],k};}h-=L[i];}
+  return{pt:P[0],a:P[0],b:P[1],u:{x:1,y:0},before:[P[0]],after:P.slice(1),pos:0,tot,seg:0,k:0};}
+function sockArc(c,u,r){const n={x:-u.y,y:u.x},P1={x:c.x+n.x*r,y:c.y+n.y*r},Q={x:c.x-u.x*r,y:c.y-u.y*r},P2={x:c.x-n.x*r,y:c.y-n.y*r};
+  const cr=(a,b)=>(a.x-c.x)*(b.y-c.y)-(a.y-c.y)*(b.x-c.x),sw=cr(P1,Q)>0?1:0,f=q=>q.x.toFixed(1)+','+q.y.toFixed(1);
+  return`M${f(P1)} A${r},${r} 0 0 ${sw} ${f(Q)} A${r},${r} 0 0 ${sw} ${f(P2)}`;}
+function ifaceSym(g,n,kind){const s=typeof E==='function'?E():null;let u={x:1,y:0};
+  if(s&&s.data&&Array.isArray(s.data.edges)){const ed=s.data.edges.find(e=>(e.from===n.id)!==(e.to===n.id));
+    if(ed){const oid=ed.from===n.id?ed.to:ed.from,o=(typeof G!=='undefined'&&G[oid])||(s.data.nodes||[]).find(x=>x.id===oid);
+      if(o){const sz=kind==='ball'?18:26,ox=o.x+(o.w||0)/2,oy=o.y+(o.h||0)/2,mx=n.x+sz/2,my=n.y+sz/2,L=Math.hypot(mx-ox,my-oy);if(L>1)u={x:(mx-ox)/L,y:(my-oy)/L};}}}
+  let lab=n.name?String(n.name):'';
+  if(kind==='ball'&&n.dock)lab='';
+  if(kind==='sock'&&s&&s.data){const bb=s.data.nodes.find(x=>x.type==='iball'&&x.dock===n.id);if(bb&&bb.name)lab=String(bb.name);}
+  if(kind==='ball'){S('circle',{cx:9,cy:9,r:BS_RB,class:'d-shape'},g);if(lab)ifaceLab(g,9,9,BS_RB,u,lab);return{w:18,h:18,shape:'circle'};}
+  const c={x:13,y:13};S('circle',{cx:13,cy:13,r:BS_RS,fill:'transparent',stroke:'none'},g);S('path',{d:sockArc(c,u,BS_RS-.5),class:'d-line'},g);
+  if(lab)ifaceLab(g,13,13,BS_RS,u,lab);return{w:26,h:26,shape:'circle'};}
+/* Lollipop rastet in Socket ein: Mittelpunkte deckungsgleich, ein gemeinsamer Name */
+const IF_SNAP=22;
+function ifaceDock(s){const N=s.data.nodes,socks=N.filter(n=>n.type==='isock');if(!socks.length&&!N.some(n=>n.dock))return;
+  const dragged=typeof drag!=='undefined'&&drag&&drag.m==='move'&&drag.items?new Set(drag.items.map(it=>it.m.id)):null;
+  N.forEach(b=>{if(b.type!=='iball'){if(b.dock)delete b.dock;return;}const bx=b.x+9,by=b.y+9;
+    const own=dragged&&dragged.has(b.id),dk=b.dock&&socks.find(k=>k.id===b.dock),dkMoving=dk&&dragged&&dragged.has(dk.id);
+    if(dk&&(!own||dkMoving)){b.x=dk.x+4;b.y=dk.y+4;return;}
+    let best=null,bd=IF_SNAP;socks.forEach(k=>{const d=Math.hypot(k.x+13-bx,k.y+13-by);const taken=N.some(o=>o!==b&&o.type==='iball'&&o.dock===k.id);if(d<bd&&!taken){bd=d;best=k;}});
+    if(best){b.dock=best.id;b.x=best.x+4;b.y=best.y+4;}else delete b.dock;});
+  N.filter(b=>b.type==='iball'&&b.dock).forEach(b=>{const i=N.indexOf(b),j=N.findIndex(k=>k.id===b.dock);if(j>i){N.splice(i,1);N.splice(N.findIndex(k=>k.id===b.dock)+1,0,b);}});}
+function ifaceLab(g,cx,cy,r,u,lab){const vert=Math.abs(u.y)>Math.abs(u.x);
+  if(!vert)T(g,cx,cy+r+15,lab,'d-txt d-n d-halo','middle');else T(g,cx+r+6,cy+4,lab,'d-txt d-n d-halo','start');}
 function drawEdge(Lr,c,s,e,off,idx){const et=c.edges[e.type];if(!et)return;const[mS,mE]=effMarks(e,et);const A=G[e.from],B=G[e.to];
   const isSel=s.sel&&s.sel.t==='edge'&&s.sel.id===e.id;
   const g=S('g',{'data-hit':'edge','data-id':e.id,class:'ed'},Lr);let d,p1,p2,lbl=et.labels?et.labels(e):{};
@@ -1727,7 +1783,7 @@ function drawEdge(Lr,c,s,e,off,idx){const et=c.edges[e.type];if(!et)return;const
   let bp=Array.isArray(e.pts)?e.pts:[];
   const ta=bp.length?bp[0]:(fb||cb),tb=bp.length?bp[bp.length-1]:(fa||ca);const dirTo=(c,t)=>{const x=t.x-c.x,y=t.y-c.y,L=Math.hypot(x,y)||1;return[x/L,y/L];};
   const[ax,ay]=dirTo(ca,ta),[bx,by]=dirTo(cb,tb);const o=fa||fb||bp.length?0:off;const nx0=-ay,ny0=ax;
-  const pa=fa||clip(A,ax,ay),pb=fb||clip(B,bx,by);p1={x:pa.x+nx0*o,y:pa.y+ny0*o};p2={x:pb.x+nx0*o,y:pb.y+ny0*o};
+  const pa=fa||clip(A,ax,ay),pb=fb||clip(B,bx,by);p1={x:pa.x+nx0*o,y:pa.y+ny0*o};p2={x:pb.x+nx0*o,y:pb.y+ny0*o};if(o){if(!fa){const q=rayRect(A,ca.x+nx0*o,ca.y+ny0*o,ax,ay);if(q)p1=q;}if(!fb){const q=rayRect(B,cb.x+nx0*o,cb.y+ny0*o,bx,by);if(q)p2=q;}}
   if(et.ortho&&!bp.length&&fa&&fb){const s1=(!e.a1&&au&&au.s1)||sideOf(A,p1),s2=(!e.a2&&au&&au.s2)||sideOf(B,p2);bp=orthoRoute(p1,s1,p2,s2);if(off&&bp.length===2){const d=Math.round(off*0.8);if(Math.abs(bp[0].x-bp[1].x)<0.5)bp=bp.map(q=>({x:q.x+d,y:q.y}));else if(Math.abs(bp[0].y-bp[1].y)<0.5)bp=bp.map(q=>({x:q.x,y:q.y+d}));}}
   if(e.qual1)p1=qualBox(A,p1,e.qual1);if(e.qual2)p2=qualBox(B,p2,e.qual2);
   const poly=[p1,...bp,p2];POLY[e.id]=poly;const q1=poly[1],q2=poly[poly.length-2];
@@ -1735,8 +1791,17 @@ function drawEdge(Lr,c,s,e,off,idx){const et=c.edges[e.type];if(!et)return;const
   const L1=Math.hypot(q2.x-p2.x,q2.y-p2.y)||1,vx=(q2.x-p2.x)/L1,vy=(q2.y-p2.y)/L1;
   d='M'+poly.map(q=>(+q.x).toFixed(1)+','+(+q.y).toFixed(1)).join(' L');
   S('path',{d,class:'hit'},g);
+  if(et.ballsock){const sp=polySplit(poly,e.lt!=null?+e.lt:.5),c=sp.pt,u=sp.u,f=q=>(+q.x).toFixed(1)+','+(+q.y).toFixed(1),sc=' d-line'+(isSel?' is-sel':'');
+    const rs=Math.min(BS_RS,Math.max(0,sp.pos-2)),rb=Math.min(BS_RB,Math.max(0,sp.tot-sp.pos-2));
+    const A1=[...sp.before,{x:c.x-u.x*rs,y:c.y-u.y*rs}],B1=[{x:c.x+u.x*rb,y:c.y+u.y*rb},...sp.after];
+    S('path',{d:'M'+A1.map(f).join(' L'),class:sc},g);S('path',{d:'M'+B1.map(f).join(' L'),class:sc},g);
+    S('path',{d:sockArc(c,u,BS_RS),class:sc},g);S('circle',{cx:c.x.toFixed(1),cy:c.y.toFixed(1),r:BS_RB,class:'d-shape'+(isSel?' is-sel':'')},g);
+    if(e.name){const vert=Math.abs(u.y)>Math.abs(u.x),sd=e.lside||(vert?'r':'b'),sh=vert?{x:sd==='l'?-BS_RS+4:BS_RS-4,y:0}:{x:0,y:sd==='t'?-BS_RS+4:BS_RS-4};
+      midLabel(S('g',{'data-hit':'elab','data-id':e.id,class:'lab'},g),sp.a,sp.b,e.name,{x:c.x+sh.x,y:c.y+sh.y},null,null,null,sd);}
+    if(isSel){EPH.push([p1,'1',e.a1||e.s1,e.id],[p2,'2',e.a2||e.s2,e.id]);bp.forEach((q,i)=>BENDH.push([q,i,e.id]));}
+    return;}
   S('path',{d,class:'d-line'+(et.dash?' d-dash':'')+(isSel?' is-sel':''),'marker-start':mS?`url(#${mS})`:null,'marker-end':mE?`url(#${mE})`:null},g);
-  if(lbl.mid){const ms=e.lt!=null?polyAt(poly,+e.lt):polyMidSeg(poly);midLabel(S('g',{'data-hit':'elab','data-id':e.id,class:'lab'},g),ms.a,ms.b,lbl.mid,ms.pt,e.readDir&&e.name?e.readDir:null,{x:poly[poly.length-1].x-poly[0].x,y:poly[poly.length-1].y-poly[0].y},o?{x:nx0*o,y:ny0*o}:null,e.lside);}
+  if(lbl.mid){const ms=e.lt!=null?polyAt(poly,+e.lt):polyMidSeg(poly);midLabel(S('g',{'data-hit':'elab','data-id':e.id,class:'lab'},g),ms.a,ms.b,lbl.mid,ms.pt,e.readDir&&e.name?e.readDir:null,{x:ms.b.x-ms.a.x,y:ms.b.y-ms.a.y},o?{x:nx0*o,y:ny0*o}:null,e.lside);}
   if(et.ortho||et.nearEnd){orthoEnd(g,p1,ux,uy,(lbl.s||[])[0],!et.smallEnd);orthoEnd(g,p2,vx,vy,(lbl.t||[])[0],!et.smallEnd);}else{endLabels(g,p1,ux,uy,lbl.s);endLabels(g,p2,vx,vy,lbl.t);}
   if(isSel){EPH.push([p1,'1',e.a1||e.s1,e.id],[p2,'2',e.a2||e.s2,e.id]);bp.forEach((q,i)=>BENDH.push([q,i,e.id]));}}
 let EPH=[],LOOPH=[],BENDH=[],POLY={};
@@ -1758,10 +1823,10 @@ function listLayout(s,Ln,Le){const done=new Set(),used=new Set();
       S('path',{d,class:'hit'},g);S('path',{d,class:'d-line'+(isSel?' is-sel':'')},g);POLY[e.id]=[{x:bx,y:cy},{x:A.x,y:cy}];done.add(e.id);y+=A.h+10;});
     S('path',{d:`M${bx},${E0.y+E0.h} V${last}`,class:'d-line'},Le);});
   return done;}
-function renderGraph(c,s){s.data.nodes=s.data.nodes.filter(n=>!(n.type==="nsd"&&n.free&&!(n.body||[]).length));G={};EPH=[];LOOPH=[];BENDH=[];POLY={};BLK={};SLOTS=[];NSM={};const Lc=S('g',null,world),Le=S('g',null,world),Ln=S('g',null,world),Lq=S('g',null,world),Ls=S('g',null,world);QLAY=Lq;
-  s.data.nodes.forEach(n=>{if(n.type==='partitionH')partNorm(n);if(n.type==='loopnode'||n.type==='condnode')n.type='knoten';const t=ndef(c,n.type);if(!t)return;
+function renderGraph(c,s){s.data.nodes=s.data.nodes.filter(n=>!(n.type==="nsd"&&n.free&&!(n.body||[]).length));G={};EPH=[];LOOPH=[];BENDH=[];POLY={};BLK={};SLOTS=[];NSM={};ifaceDock(s);parrPin(s);const Lc=S('g',null,world),Le=S('g',null,world),Ln=S('g',null,world),Lq=S('g',null,world),Ls=S('g',null,world);QLAY=Lq;
+  s.data.nodes.forEach(n=>{if(n.type==='partitionH')partNorm(n);if(n.type==='loopnode'||n.type==='condnode')n.type='knoten';if(n.type==='fr_arrow')parrNorm(n);const t=ndef(c,n.type);if(!t)return;
     const g=S('g',{transform:`translate(${n.x},${n.y})`,'data-hit':'node','data-id':n.id,class:'nd'+(n.hl?' hl-'+n.hl:'')},t.container?Lc:Ln);
-    const r=t.render(g,n);if(t.pins)drawPins(g,n,r.w,r.h);g.insertBefore(S('rect',{x:0,y:0,width:r.w,height:r.h,class:'hitr'}),g.firstChild);
+    const r=t.render(g,n);if(t.pins)drawPins(g,n,r.w,r.h);if(!r.nohit)g.insertBefore(S('rect',{x:0,y:0,width:r.w,height:r.h,class:'hitr'}),g.firstChild);
     G[n.id]={x:n.x,y:n.y,w:r.w,h:r.h,shape:r.shape||t.shape||'rect'};});
   const LST=listLayout(s,Ln,Le);
   const groups={};s.data.edges.forEach(e=>{if(e.toEdge||LST.has(e.id)||!G[e.from]||!G[e.to])return;const k=[e.from,e.to].sort().join('|');(groups[k]=groups[k]||[]).push(e);});
@@ -1774,7 +1839,7 @@ function renderGraph(c,s){s.data.nodes=s.data.nodes.filter(n=>!(n.type==="nsd"&&
   if(s.sel&&s.sel.t==='node'&&G[s.sel.id]&&(s.sel.b||s.sel.slot)){const a=s.sel.b?BLK[s.sel.b]:SLOTS.find(o=>o.nid===s.sel.id&&o.p===s.sel.slot.p&&o.k===s.sel.slot.k);
     if(a)S('rect',{x:a.x,y:a.y,width:a.w,height:a.h,class:'selbox nssel'},Ls);else s.sel={t:'node',id:s.sel.id};
     const gn=G[s.sel.id];S('rect',{x:gn.x+gn.w-6,y:gn.y+gn.h-6,width:12,height:12,class:'handle','data-hit':'handle','data-id':s.sel.id},Ls);}
-  else if(s.sel&&s.sel.t==='node'&&G[s.sel.id]){const a=G[s.sel.id];S('rect',{x:a.x-5,y:a.y-5,width:a.w+10,height:a.h+10,rx:3,class:'selbox'},Ls);
+  else if(s.sel&&s.sel.t==='node'&&G[s.sel.id]){const a=G[s.sel.id];const pn=nodeOf(s.sel.id);if(pn&&pn.type==='fr_arrow'&&!multiOn){[['1',pn.ax,pn.ay],['2',pn.bx,pn.by]].forEach(([k,x,y])=>S('circle',{cx:pn.x+x,cy:pn.y+y,r:5.5,class:'ephandle','data-hit':'parr','data-id':pn.id,'data-end':k},Ls));}else S('rect',{x:a.x-5,y:a.y-5,width:a.w+10,height:a.h+10,rx:3,class:'selbox'},Ls);
     const n=multiOn?null:nodeOf(s.sel.id);if(n&&n.type==='partition'&&c.nodes.partition)partHandles(Ls,n);if(n&&(ndef(c,n.type).resizable||ndef(c,n.type).grow))S('rect',{x:a.x+a.w-5,y:a.y+a.h-5,width:10,height:10,class:'handle','data-hit':'handle','data-id':n.id},Ls);}
   BENDH.forEach(([q,i,id])=>S('rect',{x:q.x-5.5,y:q.y-5.5,width:11,height:11,rx:2,transform:`rotate(45 ${q.x} ${q.y})`,class:'bendh','data-hit':'bend','data-id':id,'data-end':String(i)},Ls));
   LOOPH.forEach(([x,y,id])=>S('rect',{x:x-6,y:y-6,width:12,height:12,rx:2,class:'grip gxy on','data-hit':'loop','data-id':id},Ls));
@@ -2067,6 +2132,7 @@ function graphDown(e,p,h,dbl){const s=E(),c=C();
   if(h.kind==='blk'&&tool.k==='select'){const n=nodeOf(h.id);if(!n||!nsFind(n,h.b))return false;s.sel={t:'node',id:n.id,b:h.b};s.multi=[];drag={m:'blk',nid:n.id,bid:h.b,sx:p.x,sy:p.y,done:false};cap(e);render();renderProps();if(dbl)focusProps(true);return true;}
   if(h.kind==='slot'&&tool.k==='select'){const n=nodeOf(h.id);if(!n)return false;s.sel={t:'node',id:n.id,slot:{p:h.p,k:h.k}};s.multi=[];render();renderProps();return true;}
   if((h.kind==='blk'||h.kind==='slot')&&tool.k!=='select')return true;
+  if(h.kind==='parr'){const n=nodeOf(h.id);if(!n)return false;drag={m:'parr',n,end:h.end,sx:p.x,sy:p.y,done:false};cap(e);return true;}
   if(h.kind==='handle'){const n=nodeOf(h.id);if(!n)return false;drag={m:'resize',n,sx:p.x,sy:p.y,w:G[n.id].w,h:G[n.id].h,done:false};cap(e);return true;}
   if(h.kind==='pin'){const n=nodeOf(h.id);if(!n)return false;const pn=(n.pins||[]).find(x=>x.id===h.pin);if(!pn)return false;s.sel={t:'node',id:n.id};s.multi=[];drag={m:'pin',n,pn,done:false};cap(e);render();renderProps();return true;}
   if(h.kind==='node'){const n=nodeOf(h.id);if(!n)return false;
@@ -2089,7 +2155,7 @@ function graphDown(e,p,h,dbl){const s=E(),c=C();
     drag={m:'bend',e:ed,i,sx:p.x,sy:p.y,done:false,orig:(POLY[ed.id]||[]).map(q=>({x:q.x,y:q.y}))};cap(e);return true;}
   return false;}
 function uniqueName(base,names){let n=1;while(names.includes(base+n))n++;return base+n;}
-function addNode(type,p,extra,quiet){const s=E(),c=C(),t=ndef(c,type);if(!quiet)commit();const n=Object.assign({id:uid(),type,x:0,y:0},clone(t.def||{}),extra||{});if(t.autoName&&!(extra&&extra.name))n.name=uniqueName(t.autoName,s.data.nodes.map(x=>x.name));if(type==='connector'&&c.cat==='uml'){const cnt={};s.data.nodes.filter(x=>x.type==='connector').forEach(x=>{const k=(x.name||'').trim();cnt[k]=(cnt[k]||0)+1;});const open=Object.keys(cnt).find(k=>k&&cnt[k]===1);if(open)n.name=open;else{let i=0;const L=k=>String.fromCharCode(65+k%26)+(k>=26?Math.floor(k/26):'');while(cnt[L(i)])i++;n.name=L(i);}}
+function addNode(type,p,extra,quiet){const s=E(),c=C(),t=ndef(c,type);if(!quiet)commit();const n=Object.assign({id:uid(),type,x:0,y:0},clone(t.def||{}),extra||{});if(t.autoName&&!(extra&&extra.name))n.name=uniqueName(t.autoName,s.data.nodes.map(x=>x.name));if(type==='fr_num'&&!(extra&&extra.name)){const mx=s.data.nodes.filter(x=>x.type==='fr_num').reduce((m,x)=>Math.max(m,parseInt(x.name,10)||0),0);n.name=String(mx+1);}if(type==='connector'&&c.cat==='uml'){const cnt={};s.data.nodes.filter(x=>x.type==='connector').forEach(x=>{const k=(x.name||'').trim();cnt[k]=(cnt[k]||0)+1;});const open=Object.keys(cnt).find(k=>k&&cnt[k]===1);if(open)n.name=open;else{let i=0;const L=k=>String.fromCharCode(65+k%26)+(k>=26?Math.floor(k/26):'');while(cnt[L(i)])i++;n.name=L(i);}}
   const sz=t.resizable?[n.orient==='v'?6:n.w,n.orient==='h'?6:n.h]:(t.size||[120,50]);n.x=snap(p.x-sz[0]/2);n.y=snap(p.y-sz[1]/2);
   s.data.nodes.push(n);if(quiet)return n;s.sel={t:'node',id:n.id};afterCreate();render();renderProps();focusProps(t.caretEnd?'end':true);return n;}
 svg.addEventListener('pointermove',e=>{const p=wpt(e);if(pending&&tool.k==='edge')updateRubber(p);if(tool.k==='edge')updSnapMk(e,p);if(tool.k==='blk'&&!drag)nsShow(nsTarget(e.target,p));if(!drag)return;
@@ -2119,7 +2185,7 @@ svg.addEventListener('pointermove',e=>{const p=wpt(e);if(pending&&tool.k==='edge
     let j=-1;SL.ys.forEach((y,k)=>{if(y<yy-2)j=k;});if(j<0)return;grow();pt.endAt=SL.M[j].id;pt.endOff=Math.round(yy-SL.ys[j]);render();return;}
   if(drag.m==='smsg'){const m=SL.M.find(x=>x.id===drag.id);if(!m)return;const others=SL.M.filter(x=>x!==m);const k=others.filter(x=>SL.ys[SL.M.indexOf(x)]<p.y).length;
     if(k!==SL.M.indexOf(m)){if(!drag.done){commit();drag.done=true;}d.msgs.splice(d.msgs.indexOf(m),1);if(k>=others.length)d.msgs.push(m);else d.msgs.splice(d.msgs.indexOf(others[k]),0,m);render();}return;}
-  const dx=p.x-drag.sx,dy=p.y-drag.sy;if(!drag.done){if(Math.abs(dx)+Math.abs(dy)<3)return;commit();drag.done=true;}
+  const dx=p.x-drag.sx,dy=p.y-drag.sy;if(!drag.done){if(Math.abs(dx)+Math.abs(dy)<3)return;commit();drag.done=true;}if(drag.m==='parr'){const n=drag.n,x=snap(p.x)-n.x,y=snap(p.y)-n.y;if(drag.end==='1'){n.ax=x;n.ay=y;const k=E().data.nodes.find(m=>m.type==='fr_num'&&Math.hypot(p.x-(m.x+numR(m)),p.y-(m.y+numR(m)))<numR(m)+12);if(k)n.pin=k.id;else delete n.pin;}else{n.bx=x;n.by=y;}if(Math.hypot(n.bx-n.ax,n.by-n.ay)<6){if(drag.end==='1')n.ax=n.bx-6;else n.bx=n.ax+6;}const ox=n.x,oy=n.y;parrNorm(n);render();return;}
   if(drag.m==='move'){drag.items.forEach(it=>{it.m.x=snap(it.x+dx);it.m.y=snap(it.y+dy);});alignGuides(drag);const sx=drag.items[0].m.x-drag.items[0].x,sy=drag.items[0].m.y-drag.items[0].y;(drag.bends||[]).forEach(b=>{b.q.x=b.x+sx;b.q.y=b.y+sy;});render();}
   else if(drag.m==='pdiv'){const n=drag.n,P=partGeo(n);if(drag.k==='c'||drag.k==='W'){let x0=n.x+P.left;for(let i=0;i<drag.i;i++)x0+=P.cw[i];const w=Math.max(60,snap(p.x-x0));if(drag.k==='c')n.cols[drag.i].w=w;else n.w=w;}
     else{let y0=n.y+P.top;for(let i=0;i<drag.i;i++)y0+=P.rh[i];const hh=Math.max(50,snap(p.y-y0));if(drag.k==='r')n.rows[drag.i].h=hh;else n.h=hh;}render();}
@@ -2394,6 +2460,7 @@ PU.clean=function(raw){const out=[];let title='',skipDepth=0,inBlockComment=fals
   for(const line of String(raw).replace(/\r/g,'').split('\n')){let l=line.trim();
     if(inBlockComment){if(l.includes("'/"))inBlockComment=false;continue;}
     if(l.startsWith("/'")){if(!l.includes("'/",2))inBlockComment=true;continue;}
+    {const bs=l.match(/^'\s*Ball-and-Socket:\s*(\S+)\s+benötigt,\s*(\S+)\s+bietet an/i);if(bs){out.push('\u00a7BS '+bs[1]+' '+bs[2]);continue;}}
     if(!l||l.startsWith("'"))continue;
     if(skipDepth){if(l.endsWith('{'))skipDepth++;if(l==='}')skipDepth--;continue;}
     if(/^@(start|end)\w*/i.test(l))continue;
@@ -2466,8 +2533,11 @@ PU.cls=function(lines,res){const nodes=[],edges=[],map={},sk=res.skipped;let cur
     if(n.type==='enum'){t.split(/\s*,\s*/).filter(Boolean).forEach(v=>{n.values=(n.values?n.values+'\n':'')+v.replace(/[;,]$/,'');});return;}
     if(t.includes('('))n.ops=(n.ops?n.ops+'\n':'')+t;else n.attrs=(n.attrs?n.attrs+'\n':'')+t;};
   const notes=PU.noteHandler({find:nm=>get(nm,false),add:(text,target,alias)=>{const n={id:uid(),type:'note',x:0,y:0,text};nodes.push(n);if(alias)map[alias]=n;if(target)edges.push({id:uid(),type:'anchor',from:n.id,to:target.id});},last:()=>nodes.filter(n=>n.type!=='note').slice(-1)[0]});
+  const BS=new Set();
   for(const l of lines){let m;
     if(cur){if(l==='}'||l==='};'){cur=null;continue;}member(cur,l);continue;}
+    if((m=l.match(/^\u00a7BS (\S+) (\S+)$/))){BS.add(m[1]+'|'+m[2]);continue;}
+    if((m=l.match(/^circle\s+(.+?)$/i))){let rest=m[1],req=false;rest=rest.replace(/<<\s*([^>]+?)\s*>>/,(x,st)=>{if(/benötigt|required|socket/i.test(st))req=true;return'';});const d=PU.decl(rest);if(d){const n=get(d.alias);n.name=d.name;map[d.name]=n;n.type=req?'isock':'iball';['stereo','abstract','attrs','ops'].forEach(k=>delete n[k]);}continue;}
     if(notes(l))continue;
     if((m=l.match(/^(abstract\s+class|abstract|class|interface|enum|entity|annotation|protocol|struct|exception)\s+(.+)$/i))){
       const kw=m[1].toLowerCase();let rest=m[2],open=false,inline=null;
@@ -2488,9 +2558,10 @@ PU.cls=function(lines,res){const nodes=[],edges=[],map={},sk=res.skipped;let cur
       else{const la=L.includes('<'),ra=R.includes('>'),lx=L.includes('x'),rx=R.includes('x');
         if(la&&ra)type='bidir';else if(lx&&ra)type='navx';else if(rx&&la){type='navx';swap=true;}else if(ra)type='directed';else if(la){type='directed';swap=true;}else type='assoc';}
       let name=r.label,readDir='';if(/\s*>$/.test(name)){readDir='fwd';name=name.replace(/\s*>$/,'');}else if(/^<\s*/.test(name)){readDir='back';name=name.replace(/^<\s*/,'');}
+      if(type==='dependency'&&BS.has(PU.uq(r.left.v)+'|'+PU.uq(r.right.v))){type='ballsock';swap=false;}
       const e={id:uid(),type,from:(swap?B:A).id,to:(swap?A:B).id};
       const ml=swap?r.m2:r.m1,mr=swap?r.m1:r.m2;
-      if(type!=='inheritance'&&type!=='realization'&&type!=='anchor'){if(ml)e.m1=ml;if(mr)e.m2=mr;if(name)e.name=PU.uq(name);if(readDir&&name)e.readDir=swap?(readDir==='fwd'?'back':'fwd'):readDir;}
+      if(type==='ballsock'){if(name)e.name=PU.uq(name);}else       if(type!=='inheritance'&&type!=='realization'&&type!=='anchor'){if(ml)e.m1=ml;if(mr)e.m2=mr;if(name)e.name=PU.uq(name);if(readDir&&name)e.readDir=swap?(readDir==='fwd'?'back':'fwd'):readDir;}
       edges.push(e);continue;}
     if((m=l.match(/^([^:]+?)\s*:\s*(.+)$/))){const n=get(m[1],false);if(n&&n.type!=='note'){member(n,m[2]);continue;}}
     sk.push(l);}
