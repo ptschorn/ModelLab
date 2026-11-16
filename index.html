@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.5.15 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.5.20 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -546,7 +546,7 @@ html.palc .palette .tool.held::after{right:3px;top:5px;margin-top:0}
 .pkeys li{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .pkeys kbd{font:11.5px/1 'IBM Plex Mono',ui-monospace,monospace;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:3px 6px;margin:0 2px}
 .pkhint{margin:10px 0 0;font-size:12px;color:var(--muted)}
-@media (min-width:981px){html.palc{--pw:50px}html.palc .palette .tool{padding:7px}}
+@media (min-width:981px){html.palc{--pw:62px}html.palc .palette .tool{padding:7px}html.palc .palette{overflow-x:hidden;scrollbar-width:thin;scrollbar-gutter:stable}}
 .ptip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:var(--panel);font:500 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;padding:6px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.18);transform:translateY(-50%)}
 .ptip[hidden]{display:none}
 .tw-body{background:var(--panel)}
@@ -756,7 +756,13 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 .frsep{width:1px;height:20px;background:var(--line);margin:0 4px}
 .frnum{width:62px;min-height:30px;border:1px solid var(--line);border-radius:7px;padding:0 6px;background:var(--panel);color:var(--ink);font:13.5px 'IBM Plex Sans',system-ui,sans-serif}
 .frhint{margin:-4px 0 10px;color:var(--muted);font-size:12px;line-height:1.4}
-.ephandle.bendh{fill:var(--panel);stroke:var(--accent);stroke-width:1.6}
+/* ab 1.5.17: Textfeld-Formatierung in der Mini-Leiste */
+.ntb .ntsep{width:1px;align-self:stretch;margin:6px 2px;background:var(--line)}
+.ntb button.ntf{font:15px/1 'IBM Plex Sans',system-ui,sans-serif}
+.ntb button.ntf[aria-pressed="true"],.ntb .alpop button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,var(--panel));color:var(--accent)}
+.ntb .alpop .fsaa{display:inline-grid;place-items:center;width:28px}
+.fsown{display:flex;align-items:center;gap:6px;padding:8px 8px 4px;margin-top:4px;border-top:1px solid var(--line);font:12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--muted)}
+.fsown input{width:58px;min-height:28px;border:1px solid var(--line);border-radius:6px;padding:0 6px;background:var(--panel);color:var(--ink);font:13px 'IBM Plex Sans',system-ui,sans-serif}
 .modal.welcome{background:rgba(8,12,10,.28);-webkit-backdrop-filter:blur(7px) saturate(.9);backdrop-filter:blur(7px) saturate(.9)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.modal.welcome{background:rgba(8,12,10,.6)}}
 </style>
@@ -828,7 +834,7 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.5.15';
+const APP_NAME='ModelLab',APP_VER='1.5.20';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -1133,9 +1139,9 @@ function partProps(box,n){partNorm(n);const mkSec=(title,arr,kind)=>{const sec=d
     add.onclick=()=>{commit();if(kind==='c'){if(!n.cols.length)n.cols.push({name:'Bereich 1',w:n.w||400});n.cols.push({name:'Bereich '+(n.cols.length+1),w:220});}
       else{if(!n.rows.length)n.rows.push({name:'Zeile 1',h:n.h||300});n.rows.push({name:'Zeile '+(n.rows.length+1),h:180});}render();renderProps();};sec.appendChild(add);};
   mkSec('Spalten',n.cols,'c');mkSec('Zeilen',n.rows,'r');}
-function noteBox(g,n){const L=linesP(n.text);if(!L.length)L.push(' ');let w=70;L.forEach(l=>w=Math.max(w,tw(l,12.5)+28));w=Math.ceil(w);let h=L.length*V(17)+16;w=Math.max(w,+n.uw||0);h=Math.max(h,+n.uh||0);
+function noteBox(g,n){let L=linesP(n.text);if(!L.length)L.push(' ');const F=noteFmt(n,12.5);L=noteWrap(L,F,28,n.uw);let w=70;L.forEach(l=>w=Math.max(w,tw(l,F.fs)*F.bw+28));w=Math.ceil(w);let h=L.length*F.lh+16;w=Math.max(w,+n.uw||0);h=Math.max(h,+n.uh||0);
   S('path',{d:`M0,0 H${w-12} L${w},12 V${h} H0 Z`,class:'d-shape d-note'},g);S('path',{d:`M${w-12},0 V12 H${w}`,class:'d-line'},g);
-  L.forEach((l,i)=>T(g,10,8+V(13)+i*V(17),l,'d-txt d-n'));return{w,h};}
+  const x=n.al==='c'?(w-4)/2:n.al==='r'?w-16:10;L.forEach((l,i)=>{const t=T(g,x,8+F.asc+i*F.lh,l,'d-txt d-n',F.anchor);t.setAttribute('style',F.st);});return{w,h};}
 function stateBox(g,n){const L=[];if(n.entry)L.push('entry / '+n.entry);if(n.doA)L.push('do / '+n.doA);if(n.exit)L.push('exit / '+n.exit);lines(n.inner).forEach(l=>L.push(l.trim()));
   let w=Math.max(110,tw(n.name,13,false,600)+36);L.forEach(l=>w=Math.max(w,tw(l,12.5,true)+24));w=Math.ceil(w/10)*10;
   const hd=V(32);let h=L.length?hd+10+L.length*V(17):Math.max(40,V(40));
@@ -1206,7 +1212,7 @@ function freeArrow(g,n){parrNorm(n);const V=[[n.ax,n.ay],...(n.pts||[]),[n.bx,n.
   const xs=V.map(q=>q.x),ys=V.map(q=>q.y);return{w:Math.max(1,Math.max(...xs)-Math.min(...xs)),h:Math.max(1,Math.max(...ys)-Math.min(...ys)),nohit:true};}
 /* Anfasser für Zeigepfeil: Anfang, Spitze und Knickstellen */
 function parrHandles(n,Ls){[['1',n.ax,n.ay],['2',n.bx,n.by]].forEach(([k,x,y])=>S('circle',{cx:n.x+x,cy:n.y+y,r:5.5,class:'ephandle','data-hit':'parr','data-id':n.id,'data-end':k},Ls));
-  (n.pts||[]).forEach((q,i)=>{const c=S('circle',{cx:n.x+q[0],cy:n.y+q[1],r:4.8,class:'ephandle bendh','data-hit':'parr','data-id':n.id,'data-end':'k'+i},Ls);const t=document.createElementNS('http://www.w3.org/2000/svg','title');t.textContent='Knickstelle – ziehen zum Verschieben, Doppelklick zum Entfernen';c.appendChild(t);});}
+  (n.pts||[]).forEach((q,i)=>{const X=n.x+q[0],Y=n.y+q[1];const c=S('rect',{x:X-5.5,y:Y-5.5,width:11,height:11,rx:2,transform:`rotate(45 ${X} ${Y})`,class:'bendh','data-hit':'parr','data-id':n.id,'data-end':'k'+i},Ls);const t=document.createElementNS('http://www.w3.org/2000/svg','title');t.textContent='Knickpunkt – ziehen zum Verschieben, Doppelklick zum Entfernen';c.appendChild(t);});}
 const numR=n=>{const t=String(n.name==null?'':n.name).trim()||'?';return Math.max(12,tw(t,12.5)/2+6);};
 const PARR_GAP=4;
 /* Zeigepfeil an Nummer arretieren: Anfang sitzt mit kleiner Lücke am Kreis */
@@ -1464,8 +1470,8 @@ function papIO(g,n){const L=nsL(n.name);let[w,h]=papSize(n,L,120,44,32);const sk
 function papDec(g,n){const L=nsL(n.name);const t0=nsTW(L);let w=Math.ceil(Math.max(120,t0*1.8+44)/10)*10;let h=Math.ceil(Math.max(V(60),w*0.4,L.length*V(17)*1.9+18));
   w=Math.max(w,+n.uw||0);h=Math.max(h,+n.uh||0);const d=`M${w/2},0 L${w},${h/2} L${w/2},${h} L0,${h/2} Z`;S('path',{d,class:'d-shape'},g);centerLines(g,w,h,L,nsCls());return{w,h,shape:'diamond'};}
 function papCon(g,n){const L=nsL(n.name);const d=Math.ceil(Math.max(V(34),nsTW(L)+18,+n.uw||0));S('circle',{cx:d/2,cy:d/2,r:d/2,class:'d-shape'},g);centerLines(g,d,d,L,nsCls()+' d-b');return{w:d,h:d,shape:'circle'};}
-function papNote(g,n){const L=linesP(n.text);if(!L.length)L.push(' ');let w=60;L.forEach(l=>w=Math.max(w,tw(l,12.5)+22));w=Math.ceil(w);let h=L.length*V(17)+14;w=Math.max(w,+n.uw||0);h=Math.max(h,+n.uh||0);
-  S('path',{d:`M14,0 H0 V${h} H14`,class:'d-line'},g);L.forEach((l,i)=>T(g,10,7+V(13)+i*V(17),l,'d-txt d-n'));return{w,h};}
+function papNote(g,n){let L=linesP(n.text);if(!L.length)L.push(' ');const F=noteFmt(n,12.5);L=noteWrap(L,F,22,n.uw);let w=60;L.forEach(l=>w=Math.max(w,tw(l,F.fs)*F.bw+22));w=Math.ceil(w);let h=L.length*F.lh+14;w=Math.max(w,+n.uw||0);h=Math.max(h,+n.uh||0);
+  S('path',{d:`M14,0 H0 V${h} H14`,class:'d-line'},g);const x=n.al==='c'?(w+6)/2:n.al==='r'?w-4:10;L.forEach((l,i)=>{const t=T(g,x,7+F.asc+i*F.lh,l,'d-txt d-n',F.anchor);t.setAttribute('style',F.st);});return{w,h};}
 function papPt(X,n,sd){const sk=n&&(n.type==='io'||n.type==='out')?ioSk(X.h)/2:0;
   return sd==='t'?{x:X.x+X.w/2,y:X.y}:sd==='b'?{x:X.x+X.w/2,y:X.y+X.h}:sd==='l'?{x:X.x+sk,y:X.y+X.h/2}:{x:X.x+X.w-sk,y:X.y+X.h/2};}
 function papAuto(e,A,B){if(e.from===e.to)return null;const na=nodeOf(e.from),nb=nodeOf(e.to);const ca=ctr(A),cb=ctr(B),dx=cb.x-ca.x;let s1=e.s1,s2=e.s2;
@@ -2262,7 +2268,7 @@ function updNtb(){if(!curDoc){ntb.hidden=true;return;}const s=E(),c=C(),v=s.view
     else if(c.seq&&s.sel.t==='msg'&&SL){const j=SL.M.findIndex(m=>m.id===s.sel.id);if(j>=0){const m=SL.M[j];const i=SL.idx[m.from];pt={x:SL.xs[i]+50,y:SL.ys[j]-8};kind='msg';}}}
   if((!box&&!pt)||document.documentElement.classList.contains('present')){ntb.hidden=true;return;}
   const obj=kind==='node'?selObj():kind==='part'?s.data.parts.find(p=>p.id===s.sel.id):null;
-  const _e0=kind==='edge'?s.data.edges.find(x=>x.id===s.sel.id):null;const k=kind+':'+s.sel.id+':'+(s.sel.b||'')+':'+(_e0?JSON.stringify([_e0.a1,_e0.a2,_e0.s1,_e0.s2,_e0.lx,_e0.lt,_e0.lside,_e0.pts&&_e0.pts.length]):'')+':'+(obj?(obj.hl||'')+'/'+(obj.fs||'')+'/'+(kind==='part'?obj.kind||'':''):'');
+  const _e0=kind==='edge'?s.data.edges.find(x=>x.id===s.sel.id):null;const k=kind+':'+s.sel.id+':'+(s.sel.b||'')+':'+(_e0?JSON.stringify([_e0.a1,_e0.a2,_e0.s1,_e0.s2,_e0.lx,_e0.lt,_e0.lside,_e0.pts&&_e0.pts.length]):'')+':'+(obj?(obj.hl||'')+'/'+(obj.fs||'')+'/'+(kind==='part'?obj.kind||'':'')+'/'+(obj.pts?obj.pts.length:'')+'/'+(obj.b?1:0)+(obj.i?1:0)+(obj.u?1:0)+(obj.al||''):'');
   if(ntb.dataset.k!==k){ntb.dataset.k=k;ntb.classList.toggle('mid',!box);
     const _sn=kind==='node'?nodeOf(s.sel.id):null;const isNote=!!(_sn&&!s.sel.b&&_sn.type==='note');
     const ed=s.sel.b?null:(isNote&&c.edges.anchor)?['anchor',c.edges.anchor]:(Object.entries(c.edges).find(([t])=>t!=='anchor')||null);
@@ -2270,16 +2276,20 @@ function updNtb(){if(!curDoc){ntb.hidden=true;return;}const s=E(),c=C(),v=s.view
     const canRev=!!(eObj&&eT&&!eT.undirected&&!eObj.toEdge&&!eObj.toLine&&eObj.from!==eObj.to);
     const sw=obj?`<button data-n="color" title="Farbe zum Hervorheben"><span class="sw" style="background:${obj.hl?`color-mix(in srgb,${HLC.find(x=>x[0]===obj.hl)[2]} 45%,var(--nodefill))`:'var(--nodefill)'};border-color:${obj.hl?HLC.find(x=>x[0]===obj.hl)[2]:'var(--muted)'}"></span></button>`:'';
     const kb=kind==='part'&&obj?`<button data-n="kind" title="Darstellung ändern" class="kbtn">${kindIcon(obj.kind||'object')}</button>`:'';
-    const isText=kind==='node'&&obj&&obj.type==='fr_text';const curFs=isText?(+obj.fs||14):0;
-    const fsb=isText?`<button data-n="fs" class="fsbtn" title="Schriftgröße">${curFs}&nbsp;px</button>`:'';
+    const isText=kind==='node'&&obj&&obj.type==='fr_text';const isFmt=isText||(kind==='node'&&obj&&obj.type==='note'&&!s.sel.b);const curFs=isFmt?(+obj.fs||(isText?14:12.5)):0;
+    const fsb=isFmt?`<button data-n="fs" class="fsbtn" title="Schriftgröße">${String(curFs).replace('.',',')}&nbsp;px</button>`:'';
+    const ALI={'':'<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>','c':'<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>','r':'<path d="M4 6h16M10 10h10M4 14h16M10 18h10"/>'};const alSvg=k=>`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${ALI[k]}</svg>`;
+    const tfmt=isFmt&&obj?`<span class="ntsep"></span><button data-n="tfb" class="ntf" aria-pressed="${!!obj.b}" title="Fett"><b>F</b></button><button data-n="tfi" class="ntf" aria-pressed="${!!obj.i}" title="Kursiv"><i style="font-family:serif">K</i></button><button data-n="tfu" class="ntf" aria-pressed="${!!obj.u}" title="Unterstrichen"><u>U</u></button><button data-n="tal" title="Ausrichtung">${alSvg(obj.al||'')}</button><span class="ntsep"></span>`:'';
     const isNum=kind==='node'&&obj&&obj.type==='fr_num';const edBtn=isNum?`<button data-n="parr" title="Zeigepfeil von dieser Nummer ziehen – danach das Ziel anklicken">${icon('sh_arrow',17)}</button>`:(kind==='node'&&ed&&!isText)?`<button data-n="edge" title="${isNote?'Anker-Linie von hier ziehen':esc(ed[1].label)+' von hier ziehen'} – danach das Ziel anklicken">${icon(isNote?'anchor':'linkfrom',17)}</button>`:'';
     const revBtn=canRev?`<button data-n="rev" title="Richtung umkehren">${icon('rev',17)}</button>`:'';
     const custom=!!(eObj&&(eObj.a1||eObj.a2||eObj.s1||eObj.s2||eObj.lx!=null||eObj.lt!=null||eObj.lside||(eObj.pts&&eObj.pts.length)||(eObj.toLine&&eObj.at!=null&&eObj.at!==0.5)));
     const rstBtn=custom?`<button data-n="reset" title="${c.cat==='uml'?'Pfeil':'Linie'} zurücksetzen – Knickpunkte, Anschlusspunkte, Schleife und Beschriftung wieder automatisch">${icon('reset',17)}</button>`:'';
     const mvBtn=kind==='node'&&s.sel.b?`<button data-n="up" title="Nach oben (↑)">${icon('up',17)}</button><button data-n="down" title="Nach unten (↓)">${icon('down',17)}</button>`:'';
-    ntb.innerHTML=kb+edBtn+revBtn+rstBtn+sw+fsb+(kind==='node'?`<button data-n="dup" title="Duplizieren (Strg+D)">${icon('copy',17)}</button>`:'')+mvBtn+`<button data-n="del" class="dng" title="Löschen (Entf)">${icon('trash',17)}</button>`
+    const prst=(kind==='node'&&obj&&obj.type==='fr_arrow'&&obj.pts&&obj.pts.length)?`<button data-n="reset" title="Zeigepfeil zurücksetzen – Knickstellen entfernen">${icon('reset',17)}</button>`:'';
+    ntb.innerHTML=kb+edBtn+revBtn+rstBtn+prst+sw+fsb+tfmt+(kind==='node'?`<button data-n="dup" title="Duplizieren (Strg+D)">${icon('copy',17)}</button>`:'')+mvBtn+`<button data-n="del" class="dng" title="Löschen (Entf)">${icon('trash',17)}</button>`
       +(kind==='part'&&obj?`<div class="ntpop kpop" hidden>${SKINDS.map(([kk,nn])=>`<button data-kind="${kk}" aria-pressed="${(obj.kind||'object')===kk}" title="${esc(nn)}">${kindIcon(kk)}<span>${esc(KSHORT[kk]||nn)}</span></button>`).join('')}</div>`:'')
-      +(isText?`<div class="ntpop fspop" hidden>${FSIZES.map(([v,l])=>`<button data-fs="${v}" aria-pressed="${String(curFs)===v}"><span class="fsaa" style="font-size:${Math.min(+v,40)}px">Aa</span><span class="fslb">${esc(l)}</span></button>`).join('')}</div>`:'')
+      +(isFmt?`<div class="ntpop fspop" hidden>${FSIZES.map(([v,l])=>`<button data-fs="${v}" aria-pressed="${String(curFs)===v}"><span class="fsaa" style="font-size:${Math.min(+v,40)}px">Aa</span><span class="fslb">${esc(l)}</span></button>`).join('')}<div class="fsown"><span>Eigene Größe</span><input type="number" min="8" max="96" step="1" value="${curFs}" data-fsin="1"><span>px</span></div></div>`:'')
+      +(isFmt&&obj?`<div class="ntpop fspop alpop" hidden>${[['','Linksbündig'],['c','Zentriert'],['r','Rechtsbündig']].map(([k,l])=>`<button data-al="${k}" aria-pressed="${(obj.al||'')===k}"><span class="fsaa">${alSvg(k)}</span><span class="fslb">${l}</span></button>`).join('')}</div>`:'')
       +(obj?`<div class="ntpop cpop" hidden>${HLC.map(([kk,nn,col])=>`<button data-hl="${kk}" title="${nn}" aria-pressed="${(obj.hl||'')===kk}" style="background:${kk?`color-mix(in srgb,${col} 35%,var(--nodefill))`:'var(--nodefill)'};border-color:${kk?col:'var(--line)'}">${kk?'':'–'}</button>`).join('')}</div>`:'');}
   let x,y;if(box){x=v.x+(box.x+box.w)*v.k;y=v.y+box.y*v.k-8;ntb.style.transform='';}else if(kind==='edge'){x=v.x+pt.x*v.k+16;y=v.y+pt.y*v.k;ntb.style.transform='translate(0,-50%)';}else{x=v.x+pt.x*v.k;y=v.y+pt.y*v.k-10;ntb.style.transform='';}
   x=Math.min(x,svg.clientWidth-8);y=Math.max(y,40);ntb.style.left=x+'px';ntb.style.top=y+'px';ntb.hidden=false;}
@@ -2288,9 +2298,13 @@ ntb.addEventListener('click',e=>{const s=E(),c=C();const kbt=e.target.closest('[
   const fb=e.target.closest('[data-fs]');if(fb){const o=nodeOf(s.sel.id);if(!o)return;commit();o.fs=fb.dataset.fs;ntb.dataset.k='';render();renderProps();return;}
   const hb=e.target.closest('[data-hl]');
   if(hb){const o=s.sel.t==='node'?selObj():s.data.parts.find(p=>p.id===s.sel.id);if(!o)return;commit();const k=hb.dataset.hl;if(k)o.hl=k;else delete o.hl;ntb.dataset.k='';render();renderProps();return;}
+  const ab=e.target.closest('[data-al]');if(ab){const o=nodeOf(s.sel.id);if(!o)return;commit();if(ab.dataset.al)o.al=ab.dataset.al;else delete o.al;ntb.dataset.k='';render();renderProps();return;}
+  if(e.target.closest('.fsown'))return;
   const b=e.target.closest('[data-n]');if(!b)return;const a=b.dataset.n;
-  if(a==='color'||a==='kind'||a==='fs'){const sel={color:'.cpop',kind:'.kpop',fs:'.fspop'}[a];ntb.querySelectorAll('.ntpop').forEach(x=>{if(!x.matches(sel))x.hidden=true;});const pp=ntb.querySelector(sel);if(pp)pp.hidden=!pp.hidden;return;}
+  if(a==='tfb'||a==='tfi'||a==='tfu'){const o=nodeOf(s.sel.id);if(!o)return;const k=a.slice(2);commit();if(o[k])delete o[k];else o[k]=true;ntb.dataset.k='';render();renderProps();return;}
+  if(a==='color'||a==='kind'||a==='fs'||a==='tal'){const sel={color:'.cpop',kind:'.kpop',fs:'.fspop:not(.alpop)',tal:'.alpop'}[a];ntb.querySelectorAll('.ntpop').forEach(x=>{if(!x.matches(sel))x.hidden=true;});const pp=ntb.querySelector(sel);if(pp)pp.hidden=!pp.hidden;return;}
   ntb.dataset.k='';
+  if(a==='reset'&&s.sel.t==='node'){const n=nodeOf(s.sel.id);if(n&&n.type==='fr_arrow'&&n.pts){commit();delete n.pts;parrNorm(n);render();renderProps();toast('Knickstellen entfernt.');}return;}
   if(a==='reset'){const ed=s.data.edges.find(x=>x.id===s.sel.id);if(!ed)return;commit();['s1','s2','a1','a2','lx','ly','pts','lt','lside'].forEach(k=>delete ed[k]);render();renderProps();toast('Zurückgesetzt – Strg+Z macht es rückgängig.');}
   else if(a==='parr')parrStart(s.sel.id);else if(a==='del')delSel();else if(a==='dup')duplicate();else if(a==='rev')reverseEdge();else if(a==='up')nsMove(-1);else if(a==='down')nsMove(1);else if(a==='edge'){const id=s.sel.id;const n=nodeOf(id);const ed=(n&&n.type==='note'&&c.edges.anchor)?'anchor':Object.keys(c.edges).find(t=>t!=='anchor');setTool({k:'edge',type:ed});pending={id};updateHint();render();toast('Jetzt das Ziel anklicken.');}});
 
@@ -2312,6 +2326,9 @@ window.addEventListener('pointerdown',e=>{if(!svg.contains(e.target))return;
   if(!parrLive&&e.button===0&&tool.k==='node'&&tool.type==='fr_arrow'&&curDoc){e.preventDefault();const p=wpt(e),t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('[data-hit="node"]'),hn=g?nodeOf(g.dataset.id):null;parrStart(hn&&hn.type==='fr_num'?hn.id:null,p,true);e.stopImmediatePropagation();return;}
   if(!parrLive)return;e.stopImmediatePropagation();e.preventDefault();if(e.button!==0){parrEnd(false);return;}const n=nodeOf(parrLive.id);if(n){const p=wpt(e);n.bx=p.x-n.x;n.by=p.y-n.y;}parrEnd(true);},true);
 document.addEventListener('keydown',e=>{if(parrLive&&e.key==='Escape'){e.stopPropagation();e.preventDefault();parrEnd(false);}},true);
+
+ntb.addEventListener('change',e=>{const inp=e.target.closest&&e.target.closest('[data-fsin]');if(!inp)return;const s=E(),o=s.sel&&nodeOf(s.sel.id);if(!o)return;const v=Math.max(8,Math.min(96,Math.round(+inp.value||14)));commit();o.fs=String(v);ntb.dataset.k='';render();renderProps();});
+ntb.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('[data-fsin]')){e.stopPropagation();if(e.key==='Enter')e.target.blur();}});
 function setPresent(on){const h=document.documentElement;if(on===h.classList.contains('present'))return;h.classList.toggle('present',on);if(on){E().sel=null;E().multi=[];pending=null;}render();renderProps();requestAnimationFrame(()=>{updInsets();fit(true);});}
 $('#presx').onclick=()=>setPresent(false);
 function applyView(){const v=E().view||(E().view={x:40,y:40,k:1});const t=`translate(${v.x},${v.y}) scale(${v.k})`;world.setAttribute('transform',t);ov.setAttribute('transform',t);
@@ -3934,25 +3951,10 @@ function parrAddBend(n,pt){parrNorm(n);const V=[[n.ax,n.ay],...(n.pts||[]),[n.bx
     let q;if(pt){const t=Math.max(0,Math.min(1,((pt[0]-x1)*dx+(pt[1]-y1)*dy)/l2));q=[x1+dx*t,y1+dy*t];const d=Math.hypot(pt[0]-q[0],pt[1]-q[1]);if(d<bd){bd=d;bi=i;best=pt;}}
     else{const d=-Math.sqrt(l2);if(d<bd){bd=d;bi=i;const L=Math.sqrt(l2);best=[(x1+x2)/2-dy/L*24,(y1+y2)/2+dx/L*24];}}}
   commit();n.pts=n.pts||[];n.pts.splice(bi,0,[Math.round(best[0]),Math.round(best[1])]);parrNorm(n);render();renderProps();}
-FREE.fr_arrow.props=(box,n)=>{frColorRow(box,n,'Farbe');
-  const w=mk('div',{className:'fld'});w.appendChild(mk('label',null,'Knickstellen'));const r=mk('div',{className:'frbtns'});
-  const b1=mk('button',{type:'button',className:'frbtn'},'+ Knickstelle');b1.title='Knickstelle in der Mitte der längsten Strecke einfügen – auch per Doppelklick auf den Pfeil';b1.onclick=()=>parrAddBend(n,null);
-  const b2=mk('button',{type:'button',className:'frbtn'},'Alle entfernen');b2.disabled=!(n.pts&&n.pts.length);b2.onclick=()=>{commit();delete n.pts;parrNorm(n);render();renderProps();};
-  r.append(b1,b2);w.appendChild(r);box.appendChild(w);
-  box.appendChild(mk('p',{className:'frhint'},(n.pts&&n.pts.length?(n.pts.length===1?'1 Knickstelle':n.pts.length+' Knickstellen')+' – ':'')+'Doppelklick auf den Pfeil fügt eine Knickstelle ein, Doppelklick auf eine Knickstelle entfernt sie.'));};
-FREE.fr_num.props=(box,n)=>frColorRow(box,n,'Farbe');
-FREE.fr_arrow.hint='Dünner Pfeil mit Spitze, um auf ein Element zu zeigen. Anfang, Spitze und Knickstellen an den runden Anfassern ziehen, den ganzen Pfeil an der Linie verschieben.';
-FREE.fr_text.hint='Freier Text ohne Rahmen. Größe, Farbe, Ausrichtung und Schriftschnitt stellst du hier ein.';
-FREE.fr_text.props=(box,n)=>{const set=(k,v)=>{commit();if(v===undefined||v===false||v==='')delete n[k];else n[k]=v;render();renderProps();};
-  const w=mk('div',{className:'fld'});w.appendChild(mk('label',null,'Schriftgröße'));const r0=mk('div',{className:'frbtns'});
-  const inp=mk('input',{type:'number',min:8,max:96,step:1,className:'frnum'});inp.value=String(+n.fs||14);inp.onchange=()=>{const v=Math.max(8,Math.min(96,Math.round(+inp.value||14)));set('fs',String(v));};
-  r0.appendChild(inp);[12,14,18,24,32].forEach(v=>{const b=mk('button',{type:'button',className:'frbtn'+((+n.fs||14)===v?' on':'')},String(v));b.onclick=()=>set('fs',String(v));r0.appendChild(b);});w.appendChild(r0);box.appendChild(w);
-  const w2=mk('div',{className:'fld'});w2.appendChild(mk('label',null,'Schrift & Ausrichtung'));const r=mk('div',{className:'frbtns'});
-  const tg=(k,lab,tit,css)=>{const b=mk('button',{type:'button',className:'frbtn frsq'+(n[k]?' on':'')});b.innerHTML=lab;b.title=tit;if(css)b.style.cssText=css;b.setAttribute('aria-pressed',String(!!n[k]));b.onclick=()=>set(k,!n[k]);r.appendChild(b);};
-  tg('b','F','Fett','font-weight:700');tg('i','K','Kursiv','font-style:italic;font-family:serif');tg('u','U','Unterstrichen','text-decoration:underline');
-  r.appendChild(mk('span',{className:'frsep'}));
-  [['','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></svg>','Linksbündig'],['c','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 10h10M4 14h16M7 18h10"/></svg>','Zentriert'],['r','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M10 10h10M4 14h16M10 18h10"/></svg>','Rechtsbündig']].forEach(([v,ic,t])=>{const on=(n.al||'')===v;const b=mk('button',{type:'button',className:'frbtn frsq'+(on?' on':'')});b.innerHTML=ic;b.title=t;b.setAttribute('aria-pressed',String(on));b.onclick=()=>set('al',v);r.appendChild(b);});
-  w2.appendChild(r);box.appendChild(w2);frColorRow(box,n,'Farbe');};
+delete FREE.fr_arrow.props;delete FREE.fr_num.props;
+FREE.fr_arrow.hint='Dünner Pfeil mit Spitze, um auf ein Element zu zeigen. Anfang und Spitze an den runden Anfassern ziehen, den ganzen Pfeil an der Linie verschieben. Doppelklick auf die Linie setzt einen Knickpunkt, Doppelklick auf einen Knickpunkt entfernt ihn. Farbe und Zurücksetzen über die kleine Leiste.';
+FREE.fr_text.hint='Freier Text ohne Rahmen. Schriftgröße, fett/kursiv/unterstrichen, Ausrichtung und Farbe stellst du in der kleinen Leiste über dem ausgewählten Text ein.';
+delete FREE.fr_text.props;
 /* Doppelklick: Knickstelle hinzufügen / entfernen (eigene Erkennung, weil die Fläche zwischen den Klicks neu gezeichnet wird) */
 let frLastDown=null;
 window.addEventListener('pointerdown',e=>{if(e.button!==0||!curDoc||!svg.contains(e.target)||(typeof cvLocked==='function'&&cvLocked()))return;if(typeof tool!=='undefined'&&tool.k!=='select')return;
@@ -3963,7 +3965,17 @@ window.addEventListener('pointerdown',e=>{if(e.button!==0||!curDoc||!svg.contain
   if(!key||!L||L.key!==key||now-L.t>420||Math.hypot(e.clientX-L.x,e.clientY-L.y)>6)return;
   frLastDown=null;e.stopImmediatePropagation();e.preventDefault();
   if(act==='rm'){const n=nodeOf(h.dataset.id);if(!n||!n.pts)return;commit();n.pts.splice(+h.dataset.end.slice(1),1);parrNorm(n);render();renderProps();return;}
-  const n=nodeOf(h.dataset.id);const p=wpt(e);E().sel={t:'node',id:n.id};E().multi=[];parrAddBend(n,[p.x-n.x,p.y-n.y]);},true);
+  const n=nodeOf(h.dataset.id);const p=wpt(e);E().sel={t:'node',id:n.id};E().multi=[];parrAddBend(n,[p.x-n.x,p.y-n.y]);
+  const bi=(n.pts||[]).findIndex(q=>Math.hypot(n.x+q[0]-p.x,n.y+q[1]-p.y)<3);if(bi>=0){drag={m:'parr',n,end:'k'+bi,sx:p.x,sy:p.y,done:true};cap(e);}},true);
+/* Formatierung und Zeilenumbruch für Notizen (Notiz, PAP-Bemerkung) – ab 1.5.18/1.5.20 */
+function noteFmt(n,def){const fs=Math.max(8,Math.min(96,+n.fs||def));let st='font-size:'+(fs*FZ()).toFixed(1)+'px';if(n.b)st+=';font-weight:700';if(n.i)st+=';font-style:italic';if(n.u)st+=';text-decoration:underline';
+  return{fs,st,bw:n.b?1.07:1,lh:V(fs*17/12.5),asc:V(fs*13/12.5),anchor:n.al==='c'?'middle':n.al==='r'?'end':'start'};}
+const NOTE_MAXW=260;
+/* Zeilen automatisch umbrechen: Breite = vom Nutzer gezogene Breite, sonst höchstens NOTE_MAXW */
+function noteWrap(L,F,pad,uw){const W=(uw?+uw:NOTE_MAXW)-pad;const m=t=>tw(t,F.fs)*F.bw;const out=[];
+  L.forEach(l=>{if(!l.trim()||m(l)<=W){out.push(l);return;}let cur='';l.split(/(\s+)/).forEach(tok=>{if(!tok)return;const t2=cur+tok;if(m(t2.replace(/\s+$/,''))<=W||!cur.trim()){cur=t2;}else{out.push(cur.replace(/\s+$/,''));cur=tok.replace(/^\s+/,'');}
+      while(m(cur)>W&&cur.length>1){let k=cur.length-1;while(k>1&&m(cur.slice(0,k))>W)k--;out.push(cur.slice(0,k));cur=cur.slice(k);}});if(cur.trim())out.push(cur.replace(/\s+$/,''));});
+  return out;}
 const root=document.documentElement,mq=matchMedia('(prefers-color-scheme: dark)');
 const THEME_IC={dark:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',light:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'};
 const curTheme=()=>root.dataset.theme==='dark'||root.dataset.theme==='light'?root.dataset.theme:(mq.matches?'dark':'light');
