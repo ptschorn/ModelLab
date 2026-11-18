@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.5.24 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.5.25 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -842,7 +842,7 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.5.24';
+const APP_NAME='ModelLab',APP_VER='1.5.25';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -3236,12 +3236,14 @@ const taskHex=(()=>{const cx=document.createElement('canvas').getContext('2d');r
 const TASK_FGM={},TASK_BGM={};TASK_FG.forEach(([k,,h])=>{if(h)TASK_FGM[h.toLowerCase()]=k;});TASK_BG.forEach(([k,,h])=>{if(h)TASK_BGM[h.toLowerCase()]=k;});
 const TASK_FS=[['s','Klein','2'],['0','Normal','3'],['l','Groß','4'],['xl','Sehr groß','5'],['xxl','Riesig','6']];
 const TASK_FSM={'1':'s','2':'s','3':'0','4':'l','5':'xl','6':'xxl','7':'xxl'};
-function taskColCls(n){const cl=[];const cls=n.classList||[];[...cls].forEach(c=>{if(/^t[cb]-[a-z0]$/.test(c)||/^fs-(s|0|l|xl|xxl)$/.test(c)||/^ff-(m|0)$/.test(c))cl.push(c);});
-  const ff=(n.tagName==='FONT'&&n.getAttribute('face'))||(n.style&&n.style.fontFamily)||'';if(ff&&!cl.some(c=>c.startsWith('ff-')))cl.push(/courier|mono|consol/i.test(ff)?'ff-m':'ff-0');
-  if(n.tagName==='FONT'&&n.getAttribute('size')&&!cl.some(c=>c.startsWith('fs-'))){const z=TASK_FSM[String(n.getAttribute('size')).trim()];if(z)cl.push('fs-'+z);}
+function taskColCls(n){let cl=[];const cls=n.classList||[];[...cls].forEach(c=>{if(/^t[cb]-[a-z0]$/.test(c)||/^fs-(s|0|l|xl|xxl)$/.test(c)||/^ff-(m|0)$/.test(c))cl.push(c);});
+  /* Neu gesetzte Formatierung (style/Attribut des Browsers) geht vor der gespeicherten Klasse */
+  const set=(pre,v)=>{cl=cl.filter(c=>!c.startsWith(pre));cl.push(pre+v);};
+  const ff=(n.tagName==='FONT'&&n.getAttribute('face'))||(n.style&&n.style.fontFamily)||'';if(ff)set('ff-',/courier|mono|consol/i.test(ff)?'m':'0');
+  if(n.tagName==='FONT'&&n.getAttribute('size')){const z=TASK_FSM[String(n.getAttribute('size')).trim()];if(z)set('fs-',z);}
   const fc=(n.style&&n.style.color)||n.getAttribute('color')||'',bc=n.style&&n.style.backgroundColor||'';
-  if(fc&&!cl.some(c=>c.startsWith('tc-')))cl.push('tc-'+(TASK_FGM[taskHex(fc)]||'0'));
-  if(bc&&!cl.some(c=>c.startsWith('tb-')))cl.push('tb-'+(TASK_BGM[taskHex(bc)]||'0'));return cl;}
+  if(fc)set('tc-',TASK_FGM[taskHex(fc)]||'0');
+  if(bc)set('tb-',TASK_BGM[taskHex(bc)]||'0');return cl;}
 function taskClean(html){const tp=document.createElement('template');tp.innerHTML=String(html||'');const out=document.createElement('div');
   const walk=(src,dst)=>{src.childNodes.forEach(n=>{if(n.nodeType===3){dst.appendChild(document.createTextNode(n.nodeValue));return;}if(n.nodeType!==1||TASK_DROP[n.tagName])return;
     if(n.tagName==='IMG'){const s=String(n.getAttribute('src')||'').replace(/\s+/g,'');if(TASK_IMGRE.test(s)){const im=document.createElement('img');im.setAttribute('src',s);let w=taskStyleNum(n,'width','%');if(isNaN(w)){const z=[...(n.classList||[])].find(c=>/^im-(s|m)$/.test(c));if(z)w=z==='im-s'?33:66;}if(w>=5&&w<100)im.style.width=(+w.toFixed(1))+'%';im.setAttribute('alt','');dst.appendChild(im);}return;}
