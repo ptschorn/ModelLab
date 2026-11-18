@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.5.22 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.5.23 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -834,7 +834,7 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.5.22';
+const APP_NAME='ModelLab',APP_VER='1.5.23';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -3705,17 +3705,17 @@ let taskLinkBusy=false;
 function taskFollowPage(){const k=taskPageSheet(taskIdx()),s=E();if(k==null||!s.sheets||k===s.si)return;taskLinkBusy=true;try{sheetSwitch(k);}finally{taskLinkBusy=false;}}
 {const _g=taskGo;taskGo=function(i){const r=_g.apply(this,arguments);taskFollowPage();return r;};}
 {const _sw=sheetSwitch;sheetSwitch=function(i){const r=_sw.apply(this,arguments);
-  if(!taskLinkBusy&&taskOpt().sync){const P=taskPages(),s=E();if(P&&taskPageSheet(taskIdx())!==s.si){const j=P.findIndex((p,x)=>taskPageSheet(x)===s.si);if(j>=0){s.tp=j;taskSync(true);}}}
+  if(!taskLinkBusy){const P=taskPages(),s=E();if(P&&taskPageSheet(taskIdx())!==s.si){const j=P.findIndex((p,x)=>taskPageSheet(x)===s.si);if(j>=0){s.tp=j;taskSync(true);}}}
   if(typeof taskRenderNav==='function'&&!taskWin.hidden)taskRenderNav();return r;};}
 {const _d=sheetDel;sheetDel=function(i){const s=E(),n0=s&&s.sheets?s.sheets.length:0;const r=_d.apply(this,arguments);
   if(s&&s.sheets&&s.sheets.length<n0){const P=taskPages();if(P){let ch=false;P.forEach(p=>{if(!Number.isInteger(p.sheet))return;if(p.sheet===i){delete p.sheet;ch=true;}else if(p.sheet>i){p.sheet--;ch=true;}});if(ch)taskPersist();}}return r;};}
 {const _n=taskRenderNav;taskRenderNav=function(){const r=_n.apply(this,arguments);const k=taskPageSheet(taskIdx()),el=tw$('#tw-info');if(el&&k!=null&&E().sheets&&E().sheets.length>1){el.textContent+=' · '+sheetTitle(k);el.title='Diese Seite ist mit der Arbeitsfläche „'+sheetTitle(k)+'“ verknüpft.';}else if(el)el.title='';return r;};}
-{const _o=openDoc;openDoc=function(id){const r=_o.apply(this,arguments);try{if(TASK_ON&&taskOpt().sync){const P=taskPages(),st=E();if(P&&taskPageSheet(taskIdx())!==st.si){const j=P.findIndex((p,x)=>taskPageSheet(x)===st.si);if(j>=0){st.tp=j;taskSync(true);}}}if(TASK_ON&&taskOpt().auto!==false&&taskPages()&&taskWin.hidden&&!taskPop)taskOpen(true);}catch(_){}return r;};}
+{const _o=openDoc;openDoc=function(id){const r=_o.apply(this,arguments);try{if(TASK_ON){const P=taskPages(),st=E();if(P&&taskPageSheet(taskIdx())!==st.si){const j=P.findIndex((p,x)=>taskPageSheet(x)===st.si);if(j>=0){st.tp=j;taskSync(true);}}}if(TASK_ON&&taskOpt().auto!==false&&taskPages()&&taskWin.hidden&&!taskPop)taskOpen(true);}catch(_){}return r;};}
 function taskSettings(){if(!curDoc)return;const L=taskLocked(),s=E(),nS=s.sheets?s.sheets.length:1;taskEnsure();const t=E().task,P=t.pages;t.opt=t.opt||{};
   const box=mk('div',{className:'tsbox'});
   if(L)box.appendChild(mk('p',{className:'tsnote'},'Die Aufgabe ist gesperrt – Einstellungen können erst nach dem Entsperren geändert werden.'));
   box.appendChild(mk('h4',null,'Seiten mit Arbeitsflächen verknüpfen'));
-  box.appendChild(mk('p',{className:'tshelp'},'Beim Blättern in der Aufgabe wechselt die Zeichenfläche automatisch zur verknüpften Arbeitsfläche.'));
+  box.appendChild(mk('p',{className:'tshelp'},'Beim Blättern in der Aufgabe wechselt die Zeichenfläche zur verknüpften Arbeitsfläche – und beim Wechsel der Arbeitsfläche die Aufgabe zur passenden Seite.'));
   const mode=taskLinkMode();const rg=mk('div',{className:'pdfsec'});box.appendChild(rg);
   const rb=(val,label)=>{const l=mk('label',{className:'pdfck'});const i=mk('input',{type:'radio',name:'tslink',value:val,checked:mode===val,disabled:L});
     i.onchange=()=>{if(!i.checked)return;if(val==='manual'&&!P.some(p=>Number.isInteger(p.sheet))){const n=E().sheets?E().sheets.length:1;P.forEach((p,x)=>{if(x<n)p.sheet=x;});}t.opt.link=val;taskPersist();taskRenderNav();taskFollowPage();closeModal(true);setTimeout(taskSettings,10);};l.append(i,mk('span',null,label));rg.appendChild(l);};
@@ -3740,7 +3740,6 @@ function taskSettings(){if(!curDoc)return;const L=taskLocked(),s=E(),nS=s.sheets
     if(!L){const a=mk('div',{className:'mact',style:'margin-left:24px'});const b2=mk('button',null,'Alle Zuordnungen lösen');b2.onclick=()=>{P.forEach(p=>delete p.sheet);sels.forEach(x=>x.value='');taskPersist();taskRenderNav();};a.append(b2);rg.appendChild(a);}}
   box.appendChild(mk('h4',null,'Verhalten'));
   const ck=(label,key,help,defOn)=>{const l=mk('label',{className:'pdfck'});const i=mk('input',{type:'checkbox',checked:defOn?t.opt[key]!==false:!!t.opt[key],disabled:L});i.onchange=()=>{if(defOn){if(i.checked)delete t.opt[key];else t.opt[key]=false;}else if(i.checked)t.opt[key]=true;else delete t.opt[key];if(!Object.keys(t.opt).length)delete t.opt;else t.opt=t.opt;taskPersist();};l.append(i,mk('span',null,label));box.appendChild(l);if(help)box.appendChild(mk('p',{className:'tshelp sub'},help));};
-  ck('Auch umgekehrt: Beim Wechsel der Arbeitsfläche die passende Aufgabenseite zeigen','sync');
   ck('Aufgabe beim Öffnen des Diagramms automatisch anzeigen','auto',null,true);
   const a=mk('div',{className:'mact'});const ok=mk('button',{className:'pri'},'Fertig');ok.onclick=()=>closeModal(true);a.appendChild(ok);box.appendChild(a);
   openModal('Einstellungen der Aufgabe',[box]);}
