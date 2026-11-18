@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.5.23 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.5.24 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -763,6 +763,14 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 .ntb .alpop .fsaa{display:inline-grid;place-items:center;width:28px}
 .fsown{display:flex;align-items:center;gap:6px;padding:8px 8px 4px;margin-top:4px;border-top:1px solid var(--line);font:12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--muted)}
 .fsown input{width:58px;min-height:28px;border:1px solid var(--line);border-radius:6px;padding:0 6px;background:var(--panel);color:var(--ink);font:13px 'IBM Plex Sans',system-ui,sans-serif}
+/* ab 1.5.24: Nummerierung mit Buchstaben, Fortsetzen */
+.tw-body ol.tw-ol-a>li::marker{content:counter(list-item,lower-alpha) ") "}
+.tw-body ol.tw-ol-A>li::marker{content:counter(list-item,upper-alpha) ") "}
+.tw-body ol.tw-ol-i>li::marker{content:counter(list-item,lower-roman) ". "}
+#tw-tools .tm-olbtn{width:16px!important;min-width:16px!important;padding:0!important;margin-left:-3px}
+.tm-olex{flex:none;min-width:72px;font:600 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;color:var(--accent)}
+#tw-olpop{min-width:280px}
+#tw-olpop .fslb{white-space:nowrap}
 .modal.welcome{background:rgba(8,12,10,.28);-webkit-backdrop-filter:blur(7px) saturate(.9);backdrop-filter:blur(7px) saturate(.9)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.modal.welcome{background:rgba(8,12,10,.6)}}
 </style>
@@ -834,7 +842,7 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.5.23';
+const APP_NAME='ModelLab',APP_VER='1.5.24';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -3247,7 +3255,7 @@ function taskClean(html){const tp=document.createElement('template');tp.innerHTM
     if(n.tagName==='SPAN'&&C0.contains('tw-pts')){const v=parseFloat(n.getAttribute('data-p'));if(v>0&&v<1000){const g=document.createElement('span');g.className='tw-pts';g.setAttribute('data-p',String(+v.toFixed(1)));dst.appendChild(g);}return;}
     const t=TASK_TAGS[n.tagName];const cl=t==='br'||t==='hr'||TASK_STRUCT[t]?[]:taskColCls(n);let into=dst;
     if(t){const e=document.createElement(t);dst.appendChild(e);if(t==='br'||t==='hr')return;into=e;
-      if((t==='td'||t==='th')&&C0.contains('tw-ans'))e.className='tw-ans';if(t==='details')e.className='tw-help';if(t==='p'&&C0.contains('tw-boxt')&&dst.classList&&dst.classList.contains('tw-box')&&!dst.querySelector('p.tw-boxt'))e.classList.add('tw-boxt');if(/^(p|h3|h4|li|blockquote)$/.test(t)){const al=[...(n.classList||[])].find(c=>/^tw-al-[cr]$/.test(c));if(al)e.classList.add(al);}
+      if((t==='td'||t==='th')&&C0.contains('tw-ans'))e.className='tw-ans';if(t==='details')e.className='tw-help';if(t==='p'&&C0.contains('tw-boxt')&&dst.classList&&dst.classList.contains('tw-box')&&!dst.querySelector('p.tw-boxt'))e.classList.add('tw-boxt');if(t==='ol'){const st=parseInt(n.getAttribute('start'),10);if(st>1&&st<1000)e.setAttribute('start',String(st));const oc=[...(n.classList||[])].find(c=>/^tw-ol-[aAi]$/.test(c));if(oc)e.classList.add(oc);}if(/^(p|h3|h4|li|blockquote)$/.test(t)){const al=[...(n.classList||[])].find(c=>/^tw-al-[cr]$/.test(c));if(al)e.classList.add(al);}
       if(t==='col'){const w=taskStyleNum(n,'width','%');if(w>=2&&w<=100)e.style.width=(+w.toFixed(2))+'%';return;}
       if(t==='table'){const w=taskStyleNum(n,'width','%');if(w>=5&&w<=100)e.style.width=(+w.toFixed(2))+'%';}
       if(t==='tr'){const h=taskStyleNum(n,'height','px');if(h>=16&&h<=1200)e.style.height=Math.round(h)+'px';}
@@ -3873,6 +3881,7 @@ tw$('#tw-tools').addEventListener('click',e=>{const b=e.target.closest('[data-m]
   const m=b.dataset.m;
   if(m==='sup'||m==='sub'){tmFocus();TD().execCommand(m==='sup'?'superscript':'subscript');taskStore();return;}
   if(m.startsWith('al-')){tmAlign(m.slice(3));return;}
+  if(m.startsWith('ol-')){tmOl(m.slice(3));return;}
   if(m==='hr'){tmIns('<hr><p><br></p>');return;}
   if(m.startsWith('box-')){const k=m.slice(4);tmFocus();const s=TD().getSelection();
     let n0=s&&s.anchorNode;while(n0&&n0!==twBody&&!(n0.classList&&n0.classList.contains('tw-box')))n0=n0.parentNode;
@@ -3920,13 +3929,31 @@ function tmPtsEdit(el){const inp=mk('input',{type:'number',min:0.5,max:999,step:
   ok.onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});del.onclick=()=>{closeModal(true);el.remove();taskStore();tmPtsShow();};ab.onclick=()=>closeModal(true);
   const bx=mk('div',{className:'tsbox'});const l=mk('label',{className:'tm-ptlab'},'Punkte für diese Teilaufgabe');bx.append(l,inp,a);openModal('Punkte ändern',[bx]);setTimeout(()=>{inp.focus();inp.select();},40);}
 twBody.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tw-pts');if(!el||!twBody.contains(el)||taskLocked())return;e.preventDefault();e.stopPropagation();tmPtsEdit(el);},true);
+/* ---- Nummerierung: Art (1. / a) / A) / i.) und Fortsetzen ---- */
+{const tools=tw$('#tw-tools');const w=document.createElement('span');w.className='tw-cw';
+  const OL=[['','1. 2. 3.','Zahlen'],['a','a) b) c)','Kleinbuchstaben'],['A','A) B) C)','Großbuchstaben'],['i','i. ii. iii.','Römische Zahlen']];
+  w.innerHTML=`<button type="button" data-p="ol" class="tw-cbtn tm-olbtn" title="Nummerierung: Art wählen, fortsetzen oder neu beginnen"><svg width="10" height="17" viewBox="0 0 10 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10l3 3 3-3"/></svg></button><div class="tw-pop tw-fspop" id="tw-olpop" hidden><div class="tm-pth">Nummerierung</div>`+
+    OL.map(([k,ex,l])=>`<button type="button" class="tw-fsopt" data-m="ol-${k||'1'}"><span class="tm-olex">${ex}</span><span class="fslb">${l}</span></button>`).join('')+
+    `<div class="tm-pgsep"></div><button type="button" class="tw-fsopt" data-m="ol-cont"><span class="tm-olex">… 4. 5.</span><span class="fslb">Vorherige fortsetzen</span></button><button type="button" class="tw-fsopt" data-m="ol-new"><span class="tm-olex">1. 2.</span><span class="fslb">Neu beginnen</span></button></div>`;
+  const ob=tools.querySelector('[data-c="insertOrderedList"]');if(ob)ob.after(w);else tools.appendChild(w);}
+function tmCurOl(){const s=TD().getSelection();let n=s&&s.anchorNode;while(n&&n!==twBody){if(n.tagName==='OL')return n;n=n.parentNode;}return null;}
+function tmOl(m){if(!curDoc||taskLocked())return;tmFocus();let ol=tmCurOl();
+  if(m==='cont'||m==='new'){if(!ol){toast('Bitte zuerst in eine nummerierte Liste klicken.');return;}
+    if(m==='new'){ol.removeAttribute('start');taskStore();toast('Nummerierung beginnt wieder bei 1.');return;}
+    const all=[...twBody.querySelectorAll('ol')].filter(o=>o!==ol&&!o.contains(ol)&&!ol.contains(o)&&(o.compareDocumentPosition(ol)&Node.DOCUMENT_POSITION_FOLLOWING));
+    const lvl=x=>{let d=0,q=x.parentNode;while(q&&q!==twBody){if(q.tagName==='OL'||q.tagName==='UL')d++;q=q.parentNode;}return d;};const L=lvl(ol);const prev=all.filter(o=>lvl(o)===L).pop();
+    if(!prev){toast('Davor gibt es keine nummerierte Liste zum Fortsetzen.');return;}
+    const st=(parseInt(prev.getAttribute('start'),10)||1)+[...prev.children].filter(c=>c.tagName==='LI').length;ol.setAttribute('start',String(st));
+    const pc=[...prev.classList].find(c=>/^tw-ol-/.test(c));ol.classList.remove('tw-ol-a','tw-ol-A','tw-ol-i');if(pc)ol.classList.add(pc);if(!ol.className)ol.removeAttribute('class');taskStore();toast('Nummerierung fortgesetzt ab '+st+'.');return;}
+  if(!ol){TD().execCommand('insertOrderedList');ol=tmCurOl();}if(!ol)return;
+  ol.classList.remove('tw-ol-a','tw-ol-A','tw-ol-i');if(m!=='1')ol.classList.add('tw-ol-'+m);if(!ol.className)ol.removeAttribute('class');taskStore();}
 /* ---- Werkzeugleiste sinnvoll ordnen: Zeichen | Absatz | Einfügen | Schüler-Elemente ---- */
 {const tools=tw$('#tw-tools'),tbl=tw$('#tw-tbltools');
   const q=sel=>{const b=tools.querySelector(sel);return b?(b.closest('.tw-cw')&&b.closest('.tw-cw').parentNode&&tools.contains(b.closest('.tw-cw'))&&b.dataset.p?b.closest('.tw-cw'):b):null;};
   const groups=[
     ['[data-c="bold"]','[data-c="italic"]','[data-c="underline"]','[data-c="strikeThrough"]','[data-m="sup"]','[data-m="sub"]'],
     ['[data-p="fs"]','[data-p="ff"]','[data-p="fg"]','[data-p="bg"]','[data-c="clear"]'],
-    ['[data-c="h3"]','[data-c="insertUnorderedList"]','[data-c="insertOrderedList"]','[data-p="al"]','[data-c="pre"]','[data-m="hr"]'],
+    ['[data-c="h3"]','[data-c="insertUnorderedList"]','[data-c="insertOrderedList"]','[data-p="ol"]','[data-p="al"]','[data-c="pre"]','[data-m="hr"]'],
     ['[data-x="img"]','[data-p="tbl"]','[data-p="bx"]','[data-p="ch"]','[data-p="ref"]'],
     ['[data-x="help"]','[data-x="cb"]','[data-x="ans"]','[data-m="gap"]','[data-m="sel"]','[data-p="pt"]']];
   const els=groups.map(g=>g.map(q).filter(Boolean));
