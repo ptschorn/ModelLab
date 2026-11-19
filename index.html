@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!--
-  ModelLab 1.5.28 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
+  ModelLab 1.5.30 – Editor für UML-Diagramme, Datenbankmodelle und Algorithmen
   (vereint UMLab, DBLab und AlgoLab)
   © 2026 Patrick Tschorn
   Weitergabe und Veränderung nur mit Genehmigung.
@@ -848,7 +848,7 @@ html.propc:not(.propx) .props .cvlnote{display:none}
 'use strict';
 /* Welche Diagrammbereiche aktiv sind, steht ganz oben in der Datei (DGS_MODULES). */
 const MODULES=Object.assign({uml:true,db:true,algo:true,aufgaben:true},(typeof window!=='undefined'&&window.DGS_MODULES)||{});
-const APP_NAME='ModelLab',APP_VER='1.5.28';
+const APP_NAME='ModelLab',APP_VER='1.5.30';
 const APP_LOGO='<rect width="64" height="64" rx="14" fill="#058B8C"/><path d="M26 9h12M28.5 9v13.5L16 45.5A4 4 0 0 0 19.5 51.5h25a4 4 0 0 0 3.5-6L35.5 22.5V9" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 38h21" stroke="#fff" stroke-width="1.8" opacity=".5"/><rect x="21" y="41" width="8.5" height="6.5" rx="1.5" fill="#fff"/><path d="M29.5 44.2h3.5" stroke="#fff" stroke-width="1.8"/><path d="M38.5 40.2l4 4-4 4-4-4z" fill="#fff"/>';
 const CATS={
   uml:{key:'uml',name:'UML',title:'UML-Diagramme',brand:'UMLab',pfx:'umld-',fmt:'umlab',fmts:['umlab','uml-designer','uml-werkstatt'],
@@ -1119,9 +1119,12 @@ function classBox(g,n,kind){
   const ital=kind==='interface'||!!n.abstract;
   let w=Math.max(120,tw(n.name,13,false,600,ital)+2*P+10,st?tw('«'+st+'»',11.5)+2*P:0);
   const comps=kind==='enum'?[lines(n.values).map(member)]:[lines(n.attrs).map(member),lines(n.ops).map(member)];
+  /* Leerzeichen in Attributen oder Operationen = leere Bereiche ausdrücklich anzeigen (ab 1.5.29) */
+  const blank=v=>{const t=String(v==null?'':v);return t.length>0&&!t.trim().length;};const keep=kind!=='enum'&&(blank(n.attrs)||blank(n.ops));
   if(kind==='interface'&&!comps[0].length)comps.shift();
+  if(!keep){
   if(kind!=='enum'&&comps.length===2&&!comps[1].length)comps.pop();
-  if(comps.every(c=>!c.length))comps.length=0;
+  if(comps.every(c=>!c.length))comps.length=0;}
   comps.forEach(c=>c.forEach(m=>{w=Math.max(w,tw(m.s,12.5,true,400,m.i)+2*P);}));
   w=Math.ceil(w/10)*10;
   const headH=st?V(46):V(30);
